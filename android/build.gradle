@@ -48,6 +48,10 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
+  // Do NOT compress tflite model files (need to call out to developers!)
+  aaptOptions {
+      noCompress "tflite"
+  }
 }
 
 repositories {
@@ -127,5 +131,14 @@ dependencies {
   // noinspection GradleDynamicVersion
   api 'com.facebook.react:react-native:+'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  implementation 'com.google.mlkit:object-detection:16.2.3'
+  implementation project(':react-native-vision-camera')
+  // Object detection feature with bundled default classifier
+  implementation 'com.google.mlkit:object-detection:17.0.1'
+// Object detection feature with custom classifier support
+  implementation 'com.google.mlkit:object-detection-custom:17.0.1'
+  implementation 'org.tensorflow:tensorflow-lite-task-vision:0.4.0'
+  // Import the GPU delegate plugin Library for GPU inference
+  implementation 'org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.0'
+  implementation 'org.tensorflow:tensorflow-lite-gpu:2.9.0'
+  implementation "androidx.camera:camera-core:1.2.3"
 }
