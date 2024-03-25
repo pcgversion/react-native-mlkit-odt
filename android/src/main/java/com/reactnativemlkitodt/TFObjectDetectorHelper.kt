@@ -90,9 +90,11 @@ class TFObjectDetectorHelper(
 
         val modelName =
             when (currentModel) {
-                MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
-                MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
-                MODEL_EFFICIENTDETV2 -> "custom_models/model-effi_02-v4.tflite"
+                MODEL_EFFICIENTDETV0 -> "custom_models/efficientdet-lite0.tflite"
+                MODEL_EFFICIENTDETV1 -> "custom_models/efficientdet-lite1.tflite"
+                MODEL_EFFICIENTDETV2 -> "custom_models/efficientdet-lite2.tflite"
+                MODEL_EFFICIENTDETV3 -> "custom_models/efficientdet-lite3.tflite"
+                MODEL_EFFICIENTDETV4 -> "custom_models/efficientdet-lite4.tflite"
                 else -> "mobilenetv1.tflite"
             }
 

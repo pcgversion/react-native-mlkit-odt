@@ -1,4 +1,5 @@
 import { NativeModules } from 'react-native';
+import type { Frame } from 'react-native-vision-camera';
 const { MlkitOdt } = NativeModules;
 
 export type DetectedObjectBounding = {
@@ -26,11 +27,13 @@ export type ObjectDetectorOptions = {
   detectorMode: ObjectDetectorMode;
   shouldEnableClassification: boolean;
   shouldEnableMultipleObjects: boolean;
+  customModel: string;
 };
 const defaultOptions: ObjectDetectorOptions = {
   detectorMode: ObjectDetectorMode.STREAM,
   shouldEnableClassification: false,
   shouldEnableMultipleObjects: false,
+  customModel: "",
 };
 
 const unwrapResult = (res: ObjectDetectionResult | { error: any }) =>
@@ -47,10 +50,27 @@ const wrapper = {
         ? config.detectorMode
         : defaultOptions.detectorMode,
       config.shouldEnableClassification ? 1 : 0,
-      config.shouldEnableMultipleObjects ? 1 : 0
+      config.shouldEnableMultipleObjects ? 1 : 0,
+      config.customModel ? config.customModel : "",
     ).then(unwrapResult),
 };
 
 type MlkitOdtType = typeof wrapper;
 
+/**
+ * Scans barcodes in the passed frame with MLKit
+ *
+ * @param frame Camera frame
+ * @param types Array of barcode types to detect (for optimal performance, use less types)
+ * @returns Detected barcodes from MLKit
+ */
+export function detectObjects(
+  frame: Frame,
+  options: ObjectDetectorOptions = defaultOptions
+): ObjectDetectionResult[] {
+  'worklet';
+  // @ts-ignore
+  // eslint-disable-next-line no-undef
+  return __detectObjects(frame, options);
+}
 export default wrapper as MlkitOdtType;
