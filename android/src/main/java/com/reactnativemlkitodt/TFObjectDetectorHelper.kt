@@ -167,5 +167,7 @@ class TFObjectDetectorHelper(
         const val MODEL_EFFICIENTDETV0 = 0
         const val MODEL_EFFICIENTDETV1 = 1
         const val MODEL_EFFICIENTDETV2 = 2
+        const val MODEL_EFFICIENTDETV3 = 3
+        const val MODEL_EFFICIENTDETV4 = 4
     }
 }
