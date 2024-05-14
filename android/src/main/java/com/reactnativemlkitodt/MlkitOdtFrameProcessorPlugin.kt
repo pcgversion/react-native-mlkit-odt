@@ -56,6 +56,7 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
                 var enableClassification = objectDetectionOptions.getBoolean("shouldEnableClassification") 
                 var enableMultiDetect = objectDetectionOptions.getBoolean("shouldEnableMultipleObjects")
                 var customModel = objectDetectionOptions.getString("customModel")
+                var modelName = objectDetectionOptions.getString("modelName")
                 if(customModel == "automl"){
                     val image = InputImage.fromMediaImage(mediaImage, frame.imageInfo.rotationDegrees)
                     //val image = InputImage.fromMediaImage(mediaImage, 0)
@@ -88,7 +89,7 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
                     }
                 
                 }else if(customModel == "tensorflow") {
-                    var objectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, _context)
+                    var objectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, modelName, _context)
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(0).build()
                     var mlImage = MediaMlImageBuilder(mediaImage).setRotation(frame.imageInfo.rotationDegrees).build()
                     var results = objectDetector?.detectFrameProcessor(mlImage)

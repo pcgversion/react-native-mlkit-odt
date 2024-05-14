@@ -27,12 +27,14 @@ export type ObjectDetectorOptions = {
   detectorMode: ObjectDetectorMode;
   shouldEnableClassification: boolean;
   shouldEnableMultipleObjects: boolean;
+  modelName: string;
   customModel: string;
 };
 const defaultOptions: ObjectDetectorOptions = {
   detectorMode: ObjectDetectorMode.STREAM,
   shouldEnableClassification: false,
   shouldEnableMultipleObjects: false,
+  modelName: "",
   customModel: "",
 };
 
@@ -51,6 +53,7 @@ const wrapper = {
         : defaultOptions.detectorMode,
       config.shouldEnableClassification ? 1 : 0,
       config.shouldEnableMultipleObjects ? 1 : 0,
+      config.modelName ? config.modelName : "",
       config.customModel ? config.customModel : "",
     ).then(unwrapResult),
 };

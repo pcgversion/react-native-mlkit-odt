@@ -25,7 +25,7 @@ class MlkitOdtModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   }
 
   @ReactMethod
-  fun detectFromUri(uri: String, isSingleImageMode: Int, enableClassification: Int, enableMultiDetect: Int, customModel: String, promise: Promise) {
+  fun detectFromUri(uri: String, isSingleImageMode: Int, enableClassification: Int, enableMultiDetect: Int, modelName:String, customModel: String, promise: Promise) {
     val image: InputImage;
     try {
 
@@ -60,7 +60,7 @@ class MlkitOdtModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
        
       }else if(customModel == "tensorflow") {
         
-        var objectDetector = TFObjectDetectorHelper(0.5f, 2, 5, 0, 2, reactApplicationContext)
+        var objectDetector = TFObjectDetectorHelper(0.5f, 2, 5, 0, 2, modelName, reactApplicationContext)
         image = InputImage.fromFilePath(reactApplicationContext, Uri.parse(uri));
         var bitmapImage = BitmapFactory.decodeFile(Uri.parse(uri).getPath())
         

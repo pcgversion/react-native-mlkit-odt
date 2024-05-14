@@ -38,6 +38,7 @@ class TFObjectDetectorHelper(
   var maxResults: Int = 3,
   var currentDelegate: Int = 0,
   var currentModel: Int = 2,
+  var modelName: String?,
   val context: ReactApplicationContext,
   
 ) {
@@ -88,7 +89,7 @@ class TFObjectDetectorHelper(
 
         optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
 
-        val modelName =
+        var currentModelName =
             when (currentModel) {
                 MODEL_EFFICIENTDETV0 -> "custom_models/efficientdet-lite0.tflite"
                 MODEL_EFFICIENTDETV1 -> "custom_models/efficientdet-lite1.tflite"
@@ -97,10 +98,12 @@ class TFObjectDetectorHelper(
                 MODEL_EFFICIENTDETV4 -> "custom_models/efficientdet-lite4.tflite"
                 else -> "mobilenetv1.tflite"
             }
+        if(modelName != "")
+            currentModelName = "custom_models/"+modelName
 
         try {
             objectDetector =
-                ObjectDetector.createFromFileAndOptions(context, modelName, optionsBuilder.build())
+                ObjectDetector.createFromFileAndOptions(context, currentModelName, optionsBuilder.build())
         } catch (e: IllegalStateException) {
             Log.e("TFObjectDetectorHelper", "Object detector failed to initialize. See error logs for details:" + e.message)
             /*objectDetectorListener?.onError(
