@@ -31,6 +31,7 @@ import kotlin.math.max
 import org.tensorflow.lite.task.vision.detector.Detection
 import android.media.Image
 import com.google.android.odml.image.MlImage
+import java.io.File
 
 class TFObjectDetectorHelper(
   var threshold: Float = 0.5f,
@@ -98,12 +99,14 @@ class TFObjectDetectorHelper(
                 MODEL_EFFICIENTDETV4 -> "custom_models/efficientdet-lite4.tflite"
                 else -> "mobilenetv1.tflite"
             }
-        if(modelName != "")
-            currentModelName = "custom_models/"+modelName
+        if(modelName != ""){
+            currentModelName = context.filesDir.getPath()+"/custom_models/"+modelName+".tflite"
+            Log.i("TFObjectDetectorHelper",currentModelName)
+        }
 
         try {
             objectDetector =
-                ObjectDetector.createFromFileAndOptions(context, currentModelName, optionsBuilder.build())
+                ObjectDetector.createFromFileAndOptions(File(currentModelName), optionsBuilder.build())
         } catch (e: IllegalStateException) {
             Log.e("TFObjectDetectorHelper", "Object detector failed to initialize. See error logs for details:" + e.message)
             /*objectDetectorListener?.onError(

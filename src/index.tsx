@@ -18,6 +18,9 @@ export type ObjectDetectionResult = {
   trackingID?: string;
   labels: DetectedObjectLabel[];
 };
+export type DownloadCustomModelResult = {
+  result?: boolean;
+};
 
 export enum ObjectDetectorMode {
   STREAM = 0,
@@ -41,6 +44,8 @@ const defaultOptions: ObjectDetectorOptions = {
 const unwrapResult = (res: ObjectDetectionResult | { error: any }) =>
   'error' in res ? Promise.reject(res) : res;
 
+const unwrapResultCustomModelDownload = (res: DownloadCustomModelResult | { error: any }) =>
+  'error' in res ? Promise.reject(res) : res;
 const wrapper = {
   detectFromUri: (
     uri: string,
@@ -58,6 +63,10 @@ const wrapper = {
     ).then(unwrapResult),
 };
 
+export const wrapperDownloadCustomModel = {
+  downloadCustomModel:(modelName: string): Promise<DownloadCustomModelResult[]>=> 
+  MlkitOdt.downloadCustomModel(modelName).then(unwrapResultCustomModelDownload),  
+};
 type MlkitOdtType = typeof wrapper;
 
 /**

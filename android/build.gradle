@@ -141,4 +141,5 @@ dependencies {
   implementation 'org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.0'
   implementation 'org.tensorflow:tensorflow-lite-gpu:2.9.0'
   implementation "androidx.camera:camera-core:1.2.3"
+  implementation 'com.google.firebase:firebase-ml-modeldownloader:24.0.2'
 }
