@@ -7,9 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-
-		5E555C0D2413F4C50049A1A2 /* MlkitOdt.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */; };
-
+		71C9655B2C19E7D100FEE626 /* MlkitOdt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C9655A2C19E7D100FEE626 /* MlkitOdt.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,10 +24,10 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libMlkitOdt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMlkitOdt.a; sourceTree = BUILT_PRODUCTS_DIR; };
-
+		71C965592C19E7D100FEE626 /* MlkitOdt-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MlkitOdt-Bridging-Header.h"; sourceTree = "<group>"; };
+		71C9655A2C19E7D100FEE626 /* MlkitOdt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MlkitOdt.swift; sourceTree = "<group>"; };
 		B3E7B5881CC2AC0600A0062D /* MlkitOdt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MlkitOdt.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MlkitOdt.m; sourceTree = "<group>"; };
-
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,11 +52,11 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-
+				71C9655A2C19E7D100FEE626 /* MlkitOdt.swift */,
 				B3E7B5881CC2AC0600A0062D /* MlkitOdt.h */,
 				B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */,
-
 				134814211AA4EA7D00B7C361 /* Products */,
+				71C965592C19E7D100FEE626 /* MlkitOdt-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -93,6 +91,7 @@
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
+						LastSwiftMigration = 1430;
 					};
 				};
 			};
@@ -119,9 +118,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-
-				B3E7B58A1CC2AC0600A0062D /* MlkitOdt.m in Sources */,
-
+				71C9655B2C19E7D100FEE626 /* MlkitOdt.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -224,6 +221,7 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -234,13 +232,16 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = MlkitOdt;
 				SKIP_INSTALL = YES;
-
+				SWIFT_OBJC_BRIDGING_HEADER = "MlkitOdt-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -251,7 +252,8 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = MlkitOdt;
 				SKIP_INSTALL = YES;
-
+				SWIFT_OBJC_BRIDGING_HEADER = "MlkitOdt-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

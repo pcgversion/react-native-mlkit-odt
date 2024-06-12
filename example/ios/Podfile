@@ -9,7 +9,6 @@ target 'MlkitOdtExample' do
   use_react_native!(:path => config["reactNativePath"])
 
   pod 'react-native-mlkit-odt', :path => '../..'
-
   # Enables Flipper.
   #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
