@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		712FE4F42C1B1C580010A3A8 /* MlkitOdt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712FE4F32C1B1C580010A3A8 /* MlkitOdt.swift */; };
+		7162EFC62C1B22C800AD7771 /* MlkitOdt.h in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5881CC2AC0600A0062D /* MlkitOdt.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -116,6 +117,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7162EFC62C1B22C800AD7771 /* MlkitOdt.h in Sources */,
 				712FE4F42C1B1C580010A3A8 /* MlkitOdt.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
