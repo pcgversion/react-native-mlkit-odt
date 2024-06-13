@@ -1,5 +1,4 @@
 #import "MlkitOdt.h"
-#import "MlkitOdt-Swift.h"
 #import <React/RCTBridge.h>
 #import <React/RCTLog.h>
 
@@ -104,4 +103,19 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString*)imagePath singleImage:(
     }];
 }
 
+RCT_EXPORT_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    if (![FIRApp defaultApp]) {
+           [FIRApp configure];
+           NSLog(@"Firebase app configured.");
+       }
+    MlkitOdt *wrapper = [[MlkitOdt alloc] init];
+       NSLog(@"Starting model download for model name: %@", modelName);
+    [wrapper downloadModel:modelName completion:^(NSString *filePath, NSError *error) {
+            if (filePath) {
+                resolve(filePath);
+            } else {
+                reject(@"model_download_error", @"Failed to download model", error);
+            }
+        }];
+ }
 @end

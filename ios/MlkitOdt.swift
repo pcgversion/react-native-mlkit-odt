@@ -7,4 +7,20 @@
 //
 
 import Foundation
+import FirebaseMLModelDownloader
 
+@objc public class MlkitOdt: NSObject {
+    @objc public static func downloadModel(modelName: String, completion: @escaping (String?, NSError?) -> Void) {
+            let conditions = ModelDownloadConditions(allowsCellularAccess: true, allowsBackgroundDownloading: true)
+            let modelDownloader = ModelDownloader.modelDownloader()
+
+            modelDownloader.getModel(name: modelName, conditions: conditions) { result in
+                switch result {
+                case .success(let customModel):
+                    completion(customModel.path, nil)
+                case .failure(let error):
+                    completion(nil, error as NSError)
+                }
+            }
+        }
+}
