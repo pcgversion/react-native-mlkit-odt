@@ -1,14 +1,13 @@
 #import "MlkitOdt.h"
-#import <React/RCTBridgeModule.h>
+#import <React/RCTBridge.h>
 #import <React/RCTLog.h>
 
 #import <CoreGraphics/CoreGraphics.h>
 #import <GoogleMLKit/MLKit.h>
 
-//@implementation MlkitOdt
+@implementation MlkitOdt
 
-//RCT_EXPORT_MODULE()
-@interface RCT_EXTERN_REMAP_MODULE(MlkitOdt, NSObject)
+RCT_EXPORT_MODULE()
 
 static NSString *const detectionNoResultsMessage = @"Something went wrong";
 
@@ -106,7 +105,7 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString*)imagePath singleImage:(
 
 RCT_EXPORT_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
-    MlkitOdtModelDownloader *wrapper = [[MlkitOdtModelDownloader alloc] init];
+    MlkitOdt *wrapper = [[MlkitOdt alloc] init];
        NSLog(@"Starting model download for model name: %@", modelName);
     [wrapper downloadModel:modelName completion:^(NSString *filePath, NSError *error) {
             if (filePath) {

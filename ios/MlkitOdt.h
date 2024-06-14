@@ -4,4 +4,5 @@
 #import <Foundation/Foundation.h>
 
 @interface MlkitOdt: NSObject
+
 @end
