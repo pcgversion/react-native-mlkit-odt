@@ -234,7 +234,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = MlkitOdt;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "MlkitOdt-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = MlkitOdt.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -254,7 +254,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = MlkitOdt;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "MlkitOdt-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = MlkitOdt.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
