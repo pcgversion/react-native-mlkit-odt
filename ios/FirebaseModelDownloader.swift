@@ -1,15 +1,16 @@
 //
-//  MlkitOdt.swift
+//  FirebaseModelDownloader.swift
 //  MlkitOdt
 //
 //  Created by Ritesh Jariwala on 14/06/24.
 //  Copyright © 2024 Facebook. All rights reserved.
 //
 
+
 import Foundation
 import FirebaseMLModelDownloader
 
-@objc public class MlkitOdt: NSObject {
+@objc public class FirebaseModelDownloader: NSObject {
     
     @objc public static func downloadModel(_ modelName: String, resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
         let modelDownloader = ModelDownloader.modelDownloader()
