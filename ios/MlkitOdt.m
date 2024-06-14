@@ -106,7 +106,7 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString*)imagePath singleImage:(
 
 RCT_EXPORT_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
-    FirebaseModelDownloader *wrapper = [[FirebaseModelDownloader alloc] init];
+    MlkitOdt *wrapper = [[MlkitOdt alloc] init];
        NSLog(@"Starting model download for model name: %@", modelName);
     [wrapper downloadModel:modelName completion:^(NSString *filePath, NSError *error) {
             if (filePath) {

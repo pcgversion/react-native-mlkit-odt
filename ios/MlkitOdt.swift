@@ -10,7 +10,7 @@
 import Foundation
 import FirebaseMLModelDownloader
 
-@objc public class FirebaseModelDownloader: NSObject {
+@objc public class MlkitOdt: NSObject {
     
     @objc public static func downloadModel(_ modelName: String, resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
         let modelDownloader = ModelDownloader.modelDownloader()
