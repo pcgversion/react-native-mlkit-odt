@@ -1,13 +1,14 @@
 #import "MlkitOdt.h"
-#import <React/RCTBridge.h>
+#import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
 
 #import <CoreGraphics/CoreGraphics.h>
 #import <GoogleMLKit/MLKit.h>
 
-@implementation MlkitOdt
+//@implementation MlkitOdt
 
-RCT_EXPORT_MODULE()
+//RCT_EXPORT_MODULE()
+@interface RCT_EXTERN_REMAP_MODULE(MlkitOdt, NSObject)
 
 static NSString *const detectionNoResultsMessage = @"Something went wrong";
 

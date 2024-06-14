@@ -1,5 +1,7 @@
-#import <React/RCTBridgeModule.h>
+//#import <React/RCTBridgeModule.h>
 
-@interface MlkitOdt : NSObject <RCTBridgeModule>
+//@interface MlkitOdt : NSObject <RCTBridgeModule>
+#import <Foundation/Foundation.h>
 
+@interface MlkitOdt: NSObject
 @end

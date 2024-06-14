@@ -1,5 +1,5 @@
 //
-//  MlkitOdtModelDownloader.swift
+//  MlkitOdt.swift
 //  MlkitOdt
 //
 //  Created by Ritesh Jariwala on 14/06/24.
@@ -9,7 +9,7 @@
 import Foundation
 import FirebaseMLModelDownloader
 
-@objc public class MlkitOdtModelDownloader: NSObject {
+@objc public class MlkitOdt: NSObject {
     
     @objc public static func downloadModel(_ modelName: String, resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
         let modelDownloader = ModelDownloader.modelDownloader()
@@ -29,6 +29,3 @@ import FirebaseMLModelDownloader
         print("Hello");
     }
 }
-
-
-
