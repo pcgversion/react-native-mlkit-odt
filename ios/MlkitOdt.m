@@ -1,4 +1,5 @@
 #import "MlkitOdt.h"
+#import "MlkitOdt-Swift.h"
 #import "FirebaseModelDownloaderWrapper.h"
 #import <React/RCTBridge.h>
 #import <React/RCTLog.h>

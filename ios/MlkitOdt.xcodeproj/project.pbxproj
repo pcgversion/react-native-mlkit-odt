@@ -170,6 +170,8 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = MlkitOdt.h;
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MlkitOdt-Swift.h";
 			};
 			name = Debug;
 		};
@@ -212,6 +214,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = MlkitOdt.h;
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "MlkitOdt-Swift.h";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
