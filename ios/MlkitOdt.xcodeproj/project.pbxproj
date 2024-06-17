@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		714910B12C1CB87800E39898 /* MlkitOdt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714910B02C1CB87800E39898 /* MlkitOdt.swift */; };
+		71D47F6A2C200F5A00A90FF1 /* MlkitOdtHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D47F692C200F5A00A90FF1 /* MlkitOdtHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,6 +27,8 @@
 		134814201AA4EA6300B7C361 /* libMlkitOdt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMlkitOdt.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		714910AF2C1CB87700E39898 /* MlkitOdt-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MlkitOdt-Bridging-Header.h"; sourceTree = "<group>"; };
 		714910B02C1CB87800E39898 /* MlkitOdt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MlkitOdt.swift; sourceTree = "<group>"; };
+		71D47F692C200F5A00A90FF1 /* MlkitOdtHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MlkitOdtHelper.swift; sourceTree = "<group>"; };
+		71D47F702C20104100A90FF1 /* MlkitOdtHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MlkitOdtHelper.h; sourceTree = "<group>"; };
 		71DB79CA2C1C230A00CDAC45 /* MlkitOdt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MlkitOdt.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MlkitOdt.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -52,6 +55,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				71D47F702C20104100A90FF1 /* MlkitOdtHelper.h */,
+				71D47F692C200F5A00A90FF1 /* MlkitOdtHelper.swift */,
 				714910B02C1CB87800E39898 /* MlkitOdt.swift */,
 				71DB79CA2C1C230A00CDAC45 /* MlkitOdt.h */,
 				B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */,
@@ -119,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				714910B12C1CB87800E39898 /* MlkitOdt.swift in Sources */,
+				71D47F6A2C200F5A00A90FF1 /* MlkitOdtHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
