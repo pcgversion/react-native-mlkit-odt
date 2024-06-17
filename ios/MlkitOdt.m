@@ -1,5 +1,4 @@
 #import "MlkitOdt.h"
-#import "MlkitOdtHelper.h"
 #import <React/RCTBridge.h>
 #import <React/RCTLog.h>
 
@@ -103,18 +102,18 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString*)imagePath singleImage:(
         }
     }];
 }
-
-RCT_EXPORT_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    
-    MlkitOdtHelper *wrapper = [[MlkitOdtHelper alloc] init];
-       NSLog(@"Starting model download for model name: %@", modelName);
-    [wrapper downloadModel:modelName resolver:resolve rejecter:reject];
-//    [wrapper downloadModel:modelName completion:^(NSString *filePath, NSError *error) {
-//            if (filePath) {
-//                resolve(filePath);
-//            } else {
-//                reject(@"model_download_error", @"Failed to download model", error);
-//            }
-//        }];
- }
+RCT_EXTERN_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject);
+//RCT_EXPORT_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+//
+//    MlkitOdtHelper *wrapper = [[MlkitOdtHelper alloc] init];
+//       NSLog(@"Starting model download for model name: %@", modelName);
+//    [wrapper downloadModel:modelName resolver:resolve rejecter:reject];
+////    [wrapper downloadModel:modelName completion:^(NSString *filePath, NSError *error) {
+////            if (filePath) {
+////                resolve(filePath);
+////            } else {
+////                reject(@"model_download_error", @"Failed to download model", error);
+////            }
+////        }];
+// }
 @end

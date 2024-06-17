@@ -1,8 +1,8 @@
-//#import <React/RCTBridgeModule.h>
+#import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
+#import <React/RCTConvert.h>
 
-//@interface MlkitOdt : NSObject <RCTBridgeModule>
-#import <Foundation/Foundation.h>
 
-@interface MlkitOdt: NSObject
+@interface MlkitOdt : NSObject <RCTBridgeModule>
 
 @end
