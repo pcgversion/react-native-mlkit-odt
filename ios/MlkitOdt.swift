@@ -9,23 +9,23 @@
 import Foundation
 import FirebaseMLModelDownloader
 
-@objc public class MlkitOdtHelper: NSObject {
-    
-    @objc public static func downloadCustomModel(_ modelName: String, resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
+@objc(MlkitOdt)
+class MlkitOdt: NSObject {
+  @objc
+    func downloadCustomModel(_ modelName: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         let modelDownloader = ModelDownloader.modelDownloader()
         let conditions = ModelDownloadConditions()
         print("comes here");
         modelDownloader.getModel(name: modelName, downloadType:ModelDownloadType.latestModel, conditions: conditions) { result in
-            switch result {
+            switch (result) {
             case .success(let customModel):
-                resolver(customModel.path)
+                NSLog("@custom model donwloaded:, %@", customModel.path);
+                let resultData:[String:Any] = ["success":true];
+                resolve(resultData)
             case .failure(let error):
-                rejecter("model download failed","Failed to download model", error)
+                reject("model download failed","Failed to download model", error)
             }
         }
     }
     
-    @objc public static func sayHello() -> Void{
-        print("Hello");
-    }
 }

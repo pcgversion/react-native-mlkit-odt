@@ -1,13 +1,14 @@
-#import "MlkitOdt.h"
-#import <React/RCTBridge.h>
+//#import "MlkitOdt.h"
+#import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
 
 #import <CoreGraphics/CoreGraphics.h>
 #import <GoogleMLKit/MLKit.h>
 
-@implementation MlkitOdt
+//@implementation MlkitOdt
 
-RCT_EXPORT_MODULE()
+//RCT_EXPORT_MODULE()
+@interface RCT_EXTERN_MODULE(MlkitOdt, NSObject)
 
 static NSString *const detectionNoResultsMessage = @"Something went wrong";
 
@@ -102,18 +103,8 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString*)imagePath singleImage:(
         }
     }];
 }
-RCT_EXTERN_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject);
-//RCT_EXPORT_METHOD(downloadCustomModel:(NSString *)modelName resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-//
-//    MlkitOdtHelper *wrapper = [[MlkitOdtHelper alloc] init];
-//       NSLog(@"Starting model download for model name: %@", modelName);
-//    [wrapper downloadModel:modelName resolver:resolve rejecter:reject];
-////    [wrapper downloadModel:modelName completion:^(NSString *filePath, NSError *error) {
-////            if (filePath) {
-////                resolve(filePath);
-////            } else {
-////                reject(@"model_download_error", @"Failed to download model", error);
-////            }
-////        }];
-// }
+RCT_EXTERN_METHOD(downloadCustomModel:(NSString *)modelName
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject);
+
 @end

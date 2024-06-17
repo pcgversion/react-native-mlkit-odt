@@ -3,6 +3,6 @@
 #import <React/RCTConvert.h>
 
 
-@interface MlkitOdt : NSObject <RCTBridgeModule>
+//@interface MlkitOdt : NSObject <RCTBridgeModule>
 
-@end
+//@end
