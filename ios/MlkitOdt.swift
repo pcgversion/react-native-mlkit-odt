@@ -11,13 +11,15 @@ import FirebaseMLModelDownloader
 import MLKitObjectDetectionCustom
 import MLKitObjectDetection
 import MLKitVision
+import MLKitCommon
+
 
 @objc(MlkitOdt)
 class MlkitOdt: NSObject {
     @objc
     func downloadCustomModel(_ modelName: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         let modelDownloader = ModelDownloader.modelDownloader()
-        let conditions = ModelDownloadConditions()
+        let conditions = FirebaseMLModelDownloader.ModelDownloadConditions()
         modelDownloader.getModel(name: modelName, downloadType:ModelDownloadType.latestModel, conditions: conditions) { result in
             switch (result) {
             case .success(let customModel):
@@ -40,13 +42,13 @@ class MlkitOdt: NSObject {
     }
     @objc
     func detectFromUri(_ imagePath: String?,
-                       isSingle: NSNumber,
-                       enableClassification: NSNumber,
-                       enableMultidetect: NSNumber,
-                       modelName: String,
-                       customModel: String,
-                       resolve: @escaping RCTPromiseResolveBlock,
-                       reject: @escaping RCTPromiseRejectBlock) {
+                       singleImage singleImage: NSNumber,
+                       classification classification: NSNumber,
+                       multiDetect multiDetect: NSNumber,
+                       modelName modelName: String,
+                       customModel customModel: String,
+                       resolver resolve: @escaping RCTPromiseResolveBlock,
+                       rejecter reject: @escaping RCTPromiseRejectBlock) {
 
         guard let imagePath = imagePath, let imageURL = URL(string: imagePath) else {
             NSLog("@No image uri provided");
@@ -62,40 +64,47 @@ class MlkitOdt: NSObject {
             return
         }
 
-        if customModel == "automl" {
-            NSLog("custom model testing...")
+        let fileManager = FileManager.default
+        
+        // Get the document directory path
+        var absoluteModelPath: String = "";
+        if let documentDirectory = self.getDocumentsDirectory(){
+            //NSLog("@document directory path...%@", documentDirectory.path);
+            absoluteModelPath = documentDirectory.path + "/custom_models/" + modelName + ".tflite";
         }
-
-        let options = ObjectDetectorOptions()
-        options.detectorMode = isSingle.boolValue ? .singleImage : .stream
-        options.shouldEnableClassification = enableClassification.boolValue
-        options.shouldEnableMultipleObjects = enableMultidetect.boolValue
-
-        let detector = ObjectDetector.objectDetector(options: options)
-        let visionImage = VisionImage(image: image)
-        visionImage.orientation = image.imageOrientation
-
-        detector.process(visionImage) { result, error in
-            do {
-                if let error = error {
-                    throw NSError(domain: "ObjectDetectionError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
-                }
-                guard let result = result else {
-                    throw NSError(domain: "ObjectDetectionError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No results found"])
-                }
-
-                let output = self.makeOutputResult(objects: result)
-                DispatchQueue.main.async {
-                    resolve(output)
-                }
-            } catch let error as NSError {
-                let errorString = error.localizedDescription
-                let pData: [String: Any] = ["error": "On-Device object detection failed with error: \(errorString)"]
-                DispatchQueue.main.async {
-                    resolve(pData)
+        
+        let options = customModel == "automl"  ?  CustomObjectDetectorOptions(localModel:  LocalModel(path: absoluteModelPath)) : ObjectDetectorOptions()
+  
+            options.detectorMode = singleImage.boolValue ? .singleImage : .stream
+            options.shouldEnableClassification = classification.boolValue
+            options.shouldEnableMultipleObjects = multiDetect.boolValue
+        
+            let detector = ObjectDetector.objectDetector(options: options)
+            let visionImage = VisionImage(image: image)
+            visionImage.orientation = image.imageOrientation
+            
+            detector.process(visionImage) { result, error in
+                do {
+                    if let error = error {
+                        throw NSError(domain: "ObjectDetectionError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+                    }
+                    guard let result = result else {
+                        throw NSError(domain: "ObjectDetectionError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No results found"])
+                    }
+                    
+                    let output = self.makeOutputResult(objects: result)
+                    DispatchQueue.main.async {
+                        resolve(output)
+                    }
+                } catch let error as NSError {
+                    let errorString = error.localizedDescription
+                    let pData: [String: Any] = ["error": "On-Device object detection failed with error: \(errorString)"]
+                    DispatchQueue.main.async {
+                        resolve(pData)
+                    }
                 }
             }
-        }
+        
     }
 
     func createCustomModelsDirectory() -> String? {
@@ -121,7 +130,10 @@ class MlkitOdt: NSObject {
         let resultPath = customModelsDirectory.path + "/"
         return resultPath
     }
-
+    func getDocumentsDirectory() -> URL? {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths.first
+    }
     func copyFile(from sourcePathString: String, to destinationPathString: String) {
         let fileManager = FileManager.default
         
@@ -150,13 +162,13 @@ class MlkitOdt: NSObject {
         }
     }
     
+    
     func makeOutputResult(objects: [Object]?) -> [[String: Any]] {
         var output: [[String: Any]] = []
         guard let objects = objects else {
             return output
         }
-
-        for object in objects {
+               for object in objects {
             var detectedObject: [String: Any] = [:]
             detectedObject["bounding"] = self.makeBoundingResult(frame: object.frame)
 
@@ -180,8 +192,8 @@ class MlkitOdt: NSObject {
 
     func makeBoundingResult(frame: CGRect) -> [String: CGFloat] {
         return [
-            "x": frame.origin.x,
-            "y": frame.origin.y,
+            "originX": frame.origin.x,
+            "originY": frame.origin.y,
             "width": frame.size.width,
             "height": frame.size.height
         ]

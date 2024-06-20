@@ -48,14 +48,6 @@ NSMutableArray* makeOutputResult(NSArray<MLKObject *> *objects) {
     return output;
 }
 
-RCT_EXTERN_METHOD(detectFromUri:(NSString *)imagePath
-                  singleImage:(nonnull NSNumber *)isSingle
-                  classification:(nonnull NSNumber *)enableClassification
-                  multiDetect:(nonnull NSNumber *)enableMultidetect
-                  modelName:(nonnull NSString *)modelName
-                  customModel:(nonnull NSString *)customModel
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject);
 
 //RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString*)imagePath singleImage:(nonnull NSNumber*)isSingle classification:(nonnull NSNumber*)enableClassification multiDetect:(nonnull NSNumber*)enableMultidetect modelName:(nonnull NSString *)modelName customModel:(nonnull NSString *)customModel resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
 //
@@ -120,6 +112,14 @@ RCT_EXTERN_METHOD(detectFromUri:(NSString *)imagePath
 //    }];
 //}
 RCT_EXTERN_METHOD(downloadCustomModel:(NSString *)modelName
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject);
+RCT_EXTERN_METHOD(detectFromUri:(NSString *)imagePath
+                  singleImage:(nonnull NSNumber *)singleImage
+                  classification:(nonnull NSNumber *)classification
+                  multiDetect:(nonnull NSNumber *)multiDetect
+                  modelName:(nonnull NSString *)modelName
+                  customModel:(nonnull NSString *)customModel
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject);
 
