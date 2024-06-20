@@ -19,5 +19,5 @@ Pod::Spec.new do |s|
   s.dependency "React-Core"
   s.dependency 'GoogleMLKit/ObjectDetection'
   s.dependency 'FirebaseMLModelDownloader', '9.3.0-beta'
-  s.dependency "TensorFlowLiteTaskVision"
+  s.dependency "TensorFlowLiteSwift"
 end
