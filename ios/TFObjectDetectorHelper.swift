@@ -1,5 +1,5 @@
 
-import TensorFlowLiteSwift
+import TensorFlowLiteTaskVision
 
 /// Stores results for a particular frame that was successfully run through the `Interpreter`.
 struct Result {
@@ -12,7 +12,7 @@ typealias FileInfo = (name: String, extension: String)
 
 /// This class handles all data preprocessing and makes calls to run inference on a given frame
 /// by invoking the `ObjectDetector`.
-class ObjectDetectionHelper: NSObject {
+class TFObjectDetecterHelper: NSObject {
 
   // MARK: Private properties
 
