@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		714910B12C1CB87800E39898 /* MlkitOdt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714910B02C1CB87800E39898 /* MlkitOdt.swift */; };
 		717574F72C20401E0035C888 /* MlkitOdt.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */; };
+		71C39EB92C2569C000CF835D /* TFObjectDetectorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71E2D6302C245AB3006190BA /* TFObjectDetectorHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -119,6 +120,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				71C39EB92C2569C000CF835D /* TFObjectDetectorHelper.swift in Sources */,
 				717574F72C20401E0035C888 /* MlkitOdt.m in Sources */,
 				714910B12C1CB87800E39898 /* MlkitOdt.swift in Sources */,
 			);

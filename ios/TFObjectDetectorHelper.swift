@@ -12,7 +12,7 @@ typealias FileInfo = (name: String, extension: String)
 
 /// This class handles all data preprocessing and makes calls to run inference on a given frame
 /// by invoking the `ObjectDetector`.
-class TFObjectDetecterHelper: NSObject {
+class TFObjectDetectorHelper: NSObject {
 
   // MARK: Private properties
 
