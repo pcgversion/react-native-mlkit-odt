@@ -89,7 +89,6 @@ class MlkitOdt: NSObject {
             do {
              
                 let outputData = try tfObjectDetectorHelper?.detect(pixelBuffer: visionImage)
-                print("output data tensorflow: \(outputData)")
                 DispatchQueue.main.async {
                     resolve(outputData)
                 }

@@ -107,7 +107,6 @@ class TFObjectDetectorHelper: NSObject {
         
         let imageWidth = CVPixelBufferGetWidth(pixelBuffer)
         let imageHeight = CVPixelBufferGetHeight(pixelBuffer)
-        print("image widthxheight...",imageWidth, imageHeight)
         let sourcePixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
         assert(sourcePixelFormat == kCVPixelFormatType_32ARGB ||
                sourcePixelFormat == kCVPixelFormatType_32BGRA ||
@@ -171,10 +170,10 @@ class TFObjectDetectorHelper: NSObject {
     }
     
     func formatResults(boundingBox: [Float], outputClasses: [Float], outputScores: [Float], outputCount: Int, width: CGFloat, height: CGFloat) -> [[String: Any]]{
-        print("Bounding box: ", boundingBox)
-        print("categories: ",outputClasses)
-        print("scores: ", outputScores)
-        print("total boxes: ", outputCount)
+//        print("Bounding box: ", boundingBox)
+//        print("categories: ",outputClasses)
+//        print("scores: ", outputScores)
+//        print("total boxes: ", outputCount)
         var resultsArray: [Inference] = []
         var output: [[String: Any]] = []
         if (outputCount == 0) {
@@ -203,13 +202,12 @@ class TFObjectDetectorHelper: NSObject {
             // The detected corners are for model dimensions. So we scale the rect with respect to the
             // actual image dimensions.
             let newRect = rect.applying(CGAffineTransform(scaleX: width, y: height))
-            
             // Gets the color assigned for the class
             // let colorToAssign = UIColor.colorForClass(withIndex: outputClassIndex + 1)
             let bounding = Bounding(width:Int(newRect.size.width), top: Int(newRect.origin.y), left:Int(newRect.origin.x), height: Int(newRect.size.height))
             var labelText = "BoxLabel"
              if(tfModelName == "Box-Label-Detector"){
-                labelText = (outputClasses[i] == 1) ? "Box" : "Label"
+                labelText = (outputClasses[i] == 1) ? "Label" : "Box"
             }
             let trackingId: String = labelText + String(i)
             var labelsArray: [Label] = [];
@@ -229,7 +227,7 @@ class TFObjectDetectorHelper: NSObject {
         }
         for object in resultsArray {
             var detectedObject: [String: Any] = [:]
-            detectedObject["bounding"] = ["originX":object.bounding.left, "originY":object.bounding.top, "width": object.bounding.top, "height":object.bounding.height]
+            detectedObject["bounding"] = ["left":object.bounding.left, "top":object.bounding.top, "width": object.bounding.width, "height":object.bounding.height]
             detectedObject["trackingID"] = object.trackingID
             var labels: [[String: String]] = []
             for label in object.labels {
@@ -327,7 +325,7 @@ extension CVPixelBuffer {
         let imageHeight = CVPixelBufferGetHeight(self)
         
         let pixelBufferType = CVPixelBufferGetPixelFormatType(self)
-        print("CVPixelBuffer Function.......:", pixelBufferType, kCVPixelFormatType_32BGRA)
+        //print("CVPixelBuffer Function.......:", pixelBufferType, kCVPixelFormatType_32BGRA)
         //assert(pixelBufferType == kCVPixelFormatType_32BGRA)
         
         let inputImageRowBytes = CVPixelBufferGetBytesPerRow(self)

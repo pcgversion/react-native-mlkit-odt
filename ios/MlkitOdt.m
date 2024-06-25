@@ -12,7 +12,9 @@
 
 static NSString *const detectionNoResultsMessage = @"Something went wrong";
 
-
++(BOOL)requiresMainQueueSetup{
+    return YES;
+}
 NSDictionary* makeBoundingResult(CGRect frame) {
     return @{
        @"originY": @(frame.origin.y),
