@@ -12,6 +12,14 @@ import MLKitObjectDetectionCustom
 import MLKitObjectDetection
 import MLKitVision
 import MLKitCommon
+import MLImage
+import ImageIO
+import MobileCoreServices
+
+import CoreImage
+import CoreVideo
+import UIKit
+import Accelerate
 
 
 @objc(MlkitOdt)
@@ -63,7 +71,7 @@ class MlkitOdt: NSObject {
             }
             return
         }
-
+       
         let fileManager = FileManager.default
         
         // Get the document directory path
@@ -72,13 +80,33 @@ class MlkitOdt: NSObject {
             //NSLog("@document directory path...%@", documentDirectory.path);
             absoluteModelPath = documentDirectory.path + "/custom_models/" + modelName + ".tflite";
         }
-        
-        let options = customModel == "automl"  ?  CustomObjectDetectorOptions(localModel:  LocalModel(path: absoluteModelPath)) : ObjectDetectorOptions()
-  
+        if customModel == "tensorflow" {
+            let tfObjectDetectorHelper = TFObjectDetectorHelper(modelPath: absoluteModelPath, modelName: modelName, scoreThreshold: 0.5, maxResults: 3)
+            var inputData: Data
+            guard let visionImage = self.uiImageToCVPixelBuffer(image: image) else {return}
+            // Preprocess the image and prepare input tensor
+           
+            do {
+             
+                let outputData = try tfObjectDetectorHelper?.detect(pixelBuffer: visionImage)
+                print("output data tensorflow: \(outputData)")
+                DispatchQueue.main.async {
+                    resolve(outputData)
+                }
+            } catch let error as NSError{
+                let errorString = error.localizedDescription
+                let pData: [String: Any] = ["error": "On-Device object detection failed with error: \(errorString)"]
+                DispatchQueue.main.async {
+                    resolve(pData)
+                }
+            }
+        }else{
+            let options = customModel == "automl"  ?  CustomObjectDetectorOptions(localModel:  LocalModel(path: absoluteModelPath)) : ObjectDetectorOptions()
+            
             options.detectorMode = singleImage.boolValue ? .singleImage : .stream
             options.shouldEnableClassification = classification.boolValue
             options.shouldEnableMultipleObjects = multiDetect.boolValue
-        
+            
             let detector = ObjectDetector.objectDetector(options: options)
             let visionImage = VisionImage(image: image)
             visionImage.orientation = image.imageOrientation
@@ -104,9 +132,128 @@ class MlkitOdt: NSObject {
                     }
                 }
             }
+        }
         
     }
+    
+  
+    func getImageMetadata(from imageData: Data) -> (width: Int, height: Int, orientation: UIImage.Orientation)? {
+        guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, nil) else {
+            print("Unable to create image source")
+            return nil
+        }
 
+        guard let imageProperties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil) as? [CFString: Any] else {
+            print("Unable to get image properties")
+            return nil
+        }
+
+        guard let pixelWidth = imageProperties[kCGImagePropertyPixelWidth] as? Int,
+              let pixelHeight = imageProperties[kCGImagePropertyPixelHeight] as? Int,
+              let orientationValue = imageProperties[kCGImagePropertyOrientation] as? Int,
+              let orientation = UIImage.Orientation(rawValue: orientationValue) else {
+            print("Missing or invalid image properties")
+            return nil
+        }
+
+        return (width: pixelWidth, height: pixelHeight, orientation: orientation)
+    }
+    func uiImageToCVPixelBuffer(image: UIImage) -> CVPixelBuffer? {
+        guard let cgImage = image.cgImage else {
+            print("Failed to get cgImage from UIImage")
+            return nil
+        }
+        
+        let frameSize = CGSize(width: cgImage.width, height: cgImage.height)
+        
+        var pixelBuffer: CVPixelBuffer?
+        let options: [CFString: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue!,
+            kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue!
+        ]
+        
+        let status = CVPixelBufferCreate(kCFAllocatorDefault,
+                                         Int(frameSize.width),
+                                         Int(frameSize.height),
+                                         kCVPixelFormatType_32ARGB,
+                                         options as CFDictionary,
+                                         &pixelBuffer)
+        
+        guard status == kCVReturnSuccess, let createdPixelBuffer = pixelBuffer else {
+            print("Failed to create pixel buffer")
+            return nil
+        }
+        
+        CVPixelBufferLockBaseAddress(createdPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+        let pixelData = CVPixelBufferGetBaseAddress(createdPixelBuffer)
+        
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let context = CGContext(data: pixelData,
+                                width: Int(frameSize.width),
+                                height: Int(frameSize.height),
+                                bitsPerComponent: 8,
+                                bytesPerRow: CVPixelBufferGetBytesPerRow(createdPixelBuffer),
+                                space: colorSpace,
+                                bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
+        
+        guard let context = context else {
+            print("Failed to create CGContext")
+            CVPixelBufferUnlockBaseAddress(createdPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+            return nil
+        }
+        
+        context.draw(cgImage, in: CGRect(origin: .zero, size: frameSize))
+        CVPixelBufferUnlockBaseAddress(createdPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+        
+        return createdPixelBuffer
+    }
+    
+    func pixelBufferToRGBData(pixelBuffer: CVPixelBuffer) -> Data? {
+        // Lock the base address of the pixel buffer
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+        
+        guard let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer) else {
+            print("Unable to get base address from pixel buffer")
+            return nil
+        }
+        
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+        let pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
+        
+//        guard pixelFormat == kCVPixelFormatType_32BGRA else {
+//            print("Pixel format not supported")
+//            return nil
+//        }
+        
+        var rgbData = Data(count: width * height * 3)
+        
+        rgbData.withUnsafeMutableBytes { rgbPtr in
+            guard let rgbBaseAddress = rgbPtr.baseAddress else { return }
+            let buffer = baseAddress.assumingMemoryBound(to: UInt8.self)
+            
+            for y in 0..<height {
+                for x in 0..<width {
+                    let pixelIndex = y * bytesPerRow + x * 4
+                    let rgbIndex = (y * width + x) * 3
+                    
+                    let blue = buffer[pixelIndex]
+                    let green = buffer[pixelIndex + 1]
+                    let red = buffer[pixelIndex + 2]
+                    
+                    rgbBaseAddress.storeBytes(of: red, toByteOffset: rgbIndex, as: UInt8.self)
+                    rgbBaseAddress.storeBytes(of: green, toByteOffset: rgbIndex + 1, as: UInt8.self)
+                    rgbBaseAddress.storeBytes(of: blue, toByteOffset: rgbIndex + 2, as: UInt8.self)
+                }
+            }
+        }
+        
+        return rgbData
+    }
+
+   
     func createCustomModelsDirectory() -> String? {
         let fileManager = FileManager.default
         
@@ -198,10 +345,7 @@ class MlkitOdt: NSObject {
             "height": frame.size.height
         ]
     }
-    @objc
-    func sayHello()->Void{
-        print("Test")
-    }
+    
    
 }
 
