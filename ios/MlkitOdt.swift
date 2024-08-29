@@ -21,7 +21,207 @@ import CoreVideo
 import UIKit
 import Accelerate
 
+import Vision
+import AVFoundation
 
+@objc(MlkitOdtFrameProcessorPlugin)
+public class MlkitOdtFrameProcessorPlugin: NSObject, FrameProcessorPluginBase {
+    
+    @objc
+    public static func callback(_ frame: Frame!, withArgs args: [Any]!) -> Any! {
+        
+        // guard (CMSampleBufferGetImageBuffer(frame.buffer) != nil) else {
+        //   print("Failed to get image buffer from sample buffer.")
+        //   return nil
+        // }
+        // print("testing comes here...buffer data...2...",frame.buffer)
+        // let visionImage = VisionImage(buffer: frame.buffer)
+        var modelName: String = ""; 
+        var customModel: String = "";
+        var singleImage: Int? = 0;
+        var classification: Bool = false;
+        var multiDetect: Bool = false;
+        if let options = args[0] as? [String: Any] {
+            print("options....\(options["customModel"])")
+            modelName = options["modelName"] as? String ?? ""
+            customModel = options["customModel"] as? String ?? ""
+            singleImage = options["singleImage"] as? Int ?? 0
+            classification = options["classification"] as? Bool ?? false
+            multiDetect = options["multiDetect"] as? Bool ?? false
+        }
+        let fileManager = FileManager.default
+        
+        // Get the document directory path
+        var absoluteModelPath: String = "";
+        if let documentDirectory = getDocumentsDirectory(){
+            //NSLog("@document directory path...%@", documentDirectory.path);
+            absoluteModelPath = documentDirectory.path + "/custom_models/" + modelName + ".tflite";
+        }
+        guard let imageBuffer = CMSampleBufferGetImageBuffer(frame.buffer) else {
+          print("Failed to get image buffer from sample buffer.")
+          return nil
+        }
+
+        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+        
+        guard let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent) else {
+            print("Failed to create bitmap from image.")
+            return nil
+        }
+        
+        let image = UIImage(cgImage: cgImage)
+       
+        //let visionImage = VisionImage(image: image)
+        print("FrameData detect objects: \(image.size.width)x\(image.size.height)")
+        print("args: \(args[0]) \(modelName) \(customModel) \(absoluteModelPath)")
+
+         if customModel == "tensorflow" {
+            let tfObjectDetectorHelper = TFObjectDetectorHelper(modelPath: absoluteModelPath, modelName: modelName, scoreThreshold: 0.5, maxResults: 3)
+            var inputData: Data
+            guard let visionImage = uiImageToCVPixelBuffer(image: image) else {return []}
+            // Preprocess the image and prepare input tensor
+           
+            do {
+                let outputData = try tfObjectDetectorHelper?.detect(pixelBuffer: visionImage)
+                return outputData
+            } catch let error as NSError{
+                let errorString = error.localizedDescription
+                let pData: [String: Any] = ["error": "On-Device object detection failed with error: \(errorString)"]
+                return pData;
+            }
+        }else{
+            let obtOptions = customModel == "automl"  ?  CustomObjectDetectorOptions(localModel:  LocalModel(path: absoluteModelPath)) : ObjectDetectorOptions()
+            
+            obtOptions.detectorMode = singleImage == 1 ? .singleImage : .stream
+            obtOptions.shouldEnableClassification = classification
+            obtOptions.shouldEnableMultipleObjects = multiDetect
+            
+            let detector = ObjectDetector.objectDetector(options: obtOptions)
+            let visionImage = VisionImage(image: image)
+            visionImage.orientation = image.imageOrientation
+            
+            do {
+                let result = try detector.results(in: visionImage)
+                let output = makeOutputResult(objects: result)
+                return output
+                 
+            } catch let error {
+                print("Failed to detect objects in image with error: \(error.localizedDescription).")
+                return nil
+            }
+            // detector.process(visionImage) { result, error in
+            //     do {
+            //         if let error = error {
+            //             throw NSError(domain: "ObjectDetectionError", code: 0, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+            //         }
+            //         guard let result = result else {
+            //             throw NSError(domain: "ObjectDetectionError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No results found"])
+            //         }
+                    
+            //         let output :[[String: Any]] = makeOutputResult(objects: result)
+            //         return output
+            //     } catch let error as NSError {
+            //         let errorString = error.localizedDescription
+            //         let pData: [String: Any] = ["error": "On-Device object detection failed with error: \(errorString)"]
+            //         return pData
+            //     }
+            // }
+        }
+        return []
+    }
+}
+
+func getDocumentsDirectory() -> URL? {
+    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+    return paths.first
+}
+    
+ func uiImageToCVPixelBuffer(image: UIImage) -> CVPixelBuffer? {
+        guard let cgImage = image.cgImage else {
+            print("Failed to get cgImage from UIImage")
+            return nil
+        }
+        
+        let frameSize = CGSize(width: cgImage.width, height: cgImage.height)
+        
+        var pixelBuffer: CVPixelBuffer?
+        let options: [CFString: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue!,
+            kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue!
+        ]
+        
+        let status = CVPixelBufferCreate(kCFAllocatorDefault,
+                                         Int(frameSize.width),
+                                         Int(frameSize.height),
+                                         kCVPixelFormatType_32ARGB,
+                                         options as CFDictionary,
+                                         &pixelBuffer)
+        
+        guard status == kCVReturnSuccess, let createdPixelBuffer = pixelBuffer else {
+            print("Failed to create pixel buffer")
+            return nil
+        }
+        
+        CVPixelBufferLockBaseAddress(createdPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+        let pixelData = CVPixelBufferGetBaseAddress(createdPixelBuffer)
+        
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let context = CGContext(data: pixelData,
+                                width: Int(frameSize.width),
+                                height: Int(frameSize.height),
+                                bitsPerComponent: 8,
+                                bytesPerRow: CVPixelBufferGetBytesPerRow(createdPixelBuffer),
+                                space: colorSpace,
+                                bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
+        
+        guard let context = context else {
+            print("Failed to create CGContext")
+            CVPixelBufferUnlockBaseAddress(createdPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+            return nil
+        }
+        
+        context.draw(cgImage, in: CGRect(origin: .zero, size: frameSize))
+        CVPixelBufferUnlockBaseAddress(createdPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+        
+        return createdPixelBuffer
+    }
+
+    func makeOutputResult(objects: [Object]?) -> [[String: Any]] {
+        var output: [[String: Any]] = []
+        guard let objects = objects else {
+            return output
+        }
+        for object in objects {
+            var detectedObject: [String: Any] = [:]
+            detectedObject["bounding"] = makeBoundingResult(frame: object.frame)
+
+            if let trackingID = object.trackingID {
+                detectedObject["trackingID"] = trackingID
+            }
+
+            var labels: [[String: String]] = []
+            for label in object.labels {
+                var resultLabel: [String: String] = [:]
+                resultLabel["text"] = label.text
+                resultLabel["confidence"] = String(label.confidence)
+                resultLabel["index"] = String(label.index)
+                labels.append(resultLabel)
+            }
+            detectedObject["labels"] = labels
+            output.append(detectedObject)
+        }
+        return output
+    }
+
+    func makeBoundingResult(frame: CGRect) -> [String: CGFloat] {
+        return [
+            "originX": frame.origin.x,
+            "originY": frame.origin.y,
+            "width": frame.size.width,
+            "height": frame.size.height
+        ]
+    }
+    
 @objc(MlkitOdt)
 class MlkitOdt: NSObject {
     @objc

@@ -8,6 +8,12 @@
 //@implementation MlkitOdt
 
 //RCT_EXPORT_MODULE()
+#import <Foundation/Foundation.h>
+#import <VisionCamera/FrameProcessorPlugin.h>
+
+@interface VISION_EXPORT_SWIFT_FRAME_PROCESSOR(detectObjects, MlkitOdtFrameProcessorPlugin)
+@end
+
 @interface RCT_EXTERN_MODULE(MlkitOdt, NSObject)
 
 static NSString *const detectionNoResultsMessage = @"Something went wrong";
