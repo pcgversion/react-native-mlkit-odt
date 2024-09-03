@@ -62,8 +62,28 @@ public class MlkitOdtFrameProcessorPlugin: NSObject, FrameProcessorPluginBase {
           return nil
         }
 
-        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
-        
+        var ciImage = CIImage(cvPixelBuffer: imageBuffer)
+        var curDeviceOrientation = UIDevice.current.orientation
+        let isLandscape = isDeviceInLandscapeWhenFaceUp()
+        //print("current Device Orientation: \(curDeviceOrientation) \(isLandscape)")
+        switch curDeviceOrientation {
+            case UIDeviceOrientation.portraitUpsideDown:  // Device oriented vertically, Home button on the top
+                ciImage = ciImage.oriented(forExifOrientation: 3)
+            case UIDeviceOrientation.landscapeLeft:       // Device oriented horizontally, Home button on the right
+                ciImage = ciImage.oriented(forExifOrientation: 3)
+            case UIDeviceOrientation.landscapeRight:      // Device oriented horizontally, Home button on the left
+                ciImage = ciImage.oriented(forExifOrientation: 3)
+            case UIDeviceOrientation.portrait:            // Device oriented vertically, Home button on the bottom
+                ciImage = ciImage.oriented(forExifOrientation: 1)
+            case UIDeviceOrientation.faceUp:
+            ciImage = ciImage.oriented(forExifOrientation: isLandscape ? 3 : 1)
+            case UIDeviceOrientation.faceDown:
+                ciImage = ciImage.oriented(forExifOrientation: isLandscape ? 3 : 1)
+            case UIDeviceOrientation.unknown:
+                ciImage = ciImage.oriented(forExifOrientation: 1)
+            default:
+                ciImage = ciImage.oriented(forExifOrientation: 1)
+        }
         guard let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent) else {
             print("Failed to create bitmap from image.")
             return nil
@@ -71,6 +91,21 @@ public class MlkitOdtFrameProcessorPlugin: NSObject, FrameProcessorPluginBase {
         
         let image = UIImage(cgImage: cgImage)
        
+//         if let pngData = image.pngData() {
+//             // Define file path where you want to save the image
+//             let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+//             let fileURL = documentsDirectory.appendingPathComponent("image-ob-detection.png")
+//            
+//             do {
+//                 // Write PNG data to file
+//                 try pngData.write(to: fileURL)
+//                 print("Image saved successfully at \(fileURL)")
+//             } catch {
+//                 print("Error saving image: \(error)")
+//             }
+//         } else {
+//             print("Failed to convert UIImage to PNG data")
+//         }
         //let visionImage = VisionImage(image: image)
         print("FrameData detect objects: \(image.size.width)x\(image.size.height)")
         print("args: \(args[0]) \(modelName) \(customModel) \(absoluteModelPath)")
@@ -222,6 +257,19 @@ func getDocumentsDirectory() -> URL? {
         ]
     }
     
+    func isDeviceInLandscapeWhenFaceUp() -> Bool {
+        let orientation = UIDevice.current.orientation
+        // If the device is face up, check the interface orientation
+        if orientation == .faceUp {
+            // Get the current interface orientation
+            let interfaceOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
+            if let interfaceOrientation = interfaceOrientation {
+                return interfaceOrientation.isLandscape
+            }
+        }
+        // Otherwise, check if the current device orientation is landscape
+        return orientation == .landscapeLeft || orientation == .landscapeRight
+    }
 @objc(MlkitOdt)
 class MlkitOdt: NSObject {
     @objc
