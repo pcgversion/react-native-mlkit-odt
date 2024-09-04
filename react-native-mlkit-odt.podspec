@@ -11,10 +11,13 @@ Pod::Spec.new do |s|
   s.authors      = package["author"]
 
   s.platforms    = { :ios => "10.0" }
-  s.source       = { :git => "https://github.com/artikq/react-native-mlkit-odt.git", :tag => "#{s.version}" }
+  #s.source       = { :git => "https://github.com/artikq/react-native-mlkit-odt.git", :tag => "#{s.version}" }
+  s.source       = { :branch => "https://github.com/pcgversion/react-native-mlkit-odt/tree/react-native-mlkit-odt-v3"}
 
-  s.source_files = "ios/**/*.{h,m,mm}"
+  s.source_files = "ios/**/*.{h,m,mm,swift}"
 
   s.dependency "React-Core"
   s.dependency 'GoogleMLKit/ObjectDetection'
+  s.dependency 'FirebaseMLModelDownloader', '9.3.0-beta'
+  s.dependency "TensorFlowLiteSwift"
 end

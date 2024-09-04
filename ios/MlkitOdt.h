@@ -1,5 +1,9 @@
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
+#import <React/RCTConvert.h>
 
-@interface MlkitOdt : NSObject <RCTBridgeModule>
+#import <VisionCamera/FrameProcessorPlugin.h>
+#import <VisionCamera/Frame.h>
+//@interface MlkitOdt : NSObject <RCTBridgeModule>
 
-@end
+//@end
