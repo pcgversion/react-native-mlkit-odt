@@ -42,7 +42,7 @@ import java.io.ByteArrayOutputStream
 class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): FrameProcessorPlugin("detectObjects") {
    
     private val _context:ReactApplicationContext = reactContext
-
+    private var tfObjectDetector: TFObjectDetectorHelper? = null
     override fun callback(frame: ImageProxy, params: Array<Any>): Any? {
         
         @SuppressLint("UnsafeOptInUsageError")
@@ -89,10 +89,11 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
                     }
                 
                 }else if(customModel == "tensorflow") {
-                    var objectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, modelName, _context)
+                    if(tfObjectDetector == null)
+                        tfObjectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, modelName, _context)
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(0).build()
                     var mlImage = MediaMlImageBuilder(mediaImage).setRotation(frame.imageInfo.rotationDegrees).build()
-                    var results = objectDetector?.detectFrameProcessor(mlImage)
+                     var results = tfObjectDetector?.detectFrameProcessor(mlImage)
                     return tfMakeResultObject(results)
                     
                 }else{
@@ -128,6 +129,7 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
 
         }catch (e: Exception) {
             e.printStackTrace()
+            return null;
         }
         return null
     }

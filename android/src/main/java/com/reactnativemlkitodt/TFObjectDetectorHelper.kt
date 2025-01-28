@@ -53,6 +53,7 @@ class TFObjectDetectorHelper(
     }
 
     fun clearObjectDetector() {
+        objectDetector?.close() // Release the native resources
         objectDetector = null
     }
 
@@ -61,6 +62,7 @@ class TFObjectDetectorHelper(
     // that are created on the main thread and used on a background thread, but
     // the GPU delegate needs to be used on the thread that initialized the detector
     fun setupObjectDetector() {
+        clearObjectDetector() // Safely clear existing instance
         // Create the base options for the detector using specifies max results and score threshold
         val optionsBuilder =
             ObjectDetector.ObjectDetectorOptions.builder()
@@ -135,16 +137,20 @@ class TFObjectDetectorHelper(
 
         // Preprocess the image and convert it into a TensorImage for detection.
         val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))*/
+        try{
         var results = objectDetector?.detect(TensorImage.fromBitmap(image))
         
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime
        return results
+        }finally {
+            clearObjectDetector()
+        }
     }
    fun detectFrameProcessor(image: MlImage) : List <Detection>? {
         if (objectDetector == null) {
             setupObjectDetector()
         }
-
+        try{
         // Inference time is the difference between the system time at the start and finish of the
         // process
         var inferenceTime = SystemClock.uptimeMillis()
@@ -163,6 +169,9 @@ class TFObjectDetectorHelper(
         
         inferenceTime = SystemClock.uptimeMillis() - inferenceTime
        return results
+        } finally {
+            clearObjectDetector()
+        }
     }
   
 
