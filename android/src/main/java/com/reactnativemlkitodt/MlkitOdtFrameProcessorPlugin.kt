@@ -21,6 +21,7 @@ import android.graphics.ImageFormat
 import java.nio.ByteBuffer
 import android.util.Log
 import android.media.Image
+import android.media.ImageReader
 import androidx.camera.core.ImageProxy
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -92,9 +93,20 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
                     if(tfObjectDetector == null)
                         tfObjectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, modelName, _context)
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(0).build()
-                    var mlImage = MediaMlImageBuilder(mediaImage).setRotation(frame.imageInfo.rotationDegrees).build()
-                     var results = tfObjectDetector?.detectFrameProcessor(mlImage)
+                    //val bitmap = imageProxyToBitmap(frame) ?: return null
+                    val bitmap = convertImageProxyToBitmap(frame)
+                    // Ensure newImage is not null before using it
+                    if (bitmap != null) {
+                    //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(frame.imageInfo.rotationDegrees).build()
+                    //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(frame.imageInfo.rotationDegrees).build()
+                        var mlImage = BitmapMlImageBuilder(bitmap).setRotation(0).build()
+                        var results = tfObjectDetector?.detectFrameProcessor(mlImage)
                     return tfMakeResultObject(results)
+                    }else{
+                         // Handle the error case (e.g., log or return early)
+                        Log.e("ImageProcessing", "Failed to rotate image: Image is null")
+                        return null;
+                    }
                     
                 }else{
 
@@ -195,11 +207,11 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
     return coordinates;
   }
 
-    private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap {
-        val planes = imageProxy.planes
-        val yBuffer = planes[0].buffer
-        val uBuffer = planes[1].buffer
-        val vBuffer = planes[2].buffer
+    private fun convertImageProxyToBitmap(imageProxy: ImageProxy): Bitmap? {
+        val image = imageProxy.image ?: return null
+        val yBuffer = image.planes[0].buffer // Y
+        val uBuffer = image.planes[1].buffer // U
+        val vBuffer = image.planes[2].buffer // V
         val ySize = yBuffer.remaining()
         val uSize = uBuffer.remaining()
         val vSize = vBuffer.remaining()
@@ -207,35 +219,88 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
         yBuffer.get(nv21, 0, ySize)
         vBuffer.get(nv21, ySize, vSize)
         uBuffer.get(nv21, ySize + vSize, uSize)
-        val width = imageProxy.width
-        val height = imageProxy.height
-        val yuvImage = YuvImage(nv21, android.graphics.ImageFormat.NV21, width, height, null)
+
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, imageProxy.width, imageProxy.height, null)
         val out = ByteArrayOutputStream()
-        yuvImage.compressToJpeg(Rect(0, 0, width, height), 100, out)
-        val imageBytes = out.toByteArray()
-        var bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        yuvImage.compressToJpeg(Rect(0, 0, imageProxy.width, imageProxy.height), 100, out)
+        val byteArray = out.toByteArray()
+        val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        // Rotate the bitmap based on the rotation degrees
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-         Log.d("OB DETECTOR.....ROTATION", "${rotationDegrees}")
-        if (rotationDegrees != 0) {
             val matrix = Matrix()
             matrix.postRotate(rotationDegrees.toFloat())
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+        return Bitmap.createBitmap(
+            originalBitmap, 
+            0, 
+            0, 
+            originalBitmap.width, 
+            originalBitmap.height, 
+            matrix, 
+            true
+        )
+    }
+    fun rotateBitmap(mediaImage: Image, rotationDegrees: Int): Bitmap? {
+        Log.d("ImageProcessing", "Received image for rotation.")
+        // Convert mediaImage to Bitmap
+        val bitmap = mediaImageToBitmap(mediaImage)
+        if (bitmap == null) {
+            Log.e("ImageProcessing", "Failed to convert mediaImage to Bitmap")
+            return null
         }
+        Log.d("ImageProcessing", "Converted Image to Bitmap successfully.")
+        // Rotate the Bitmap
+        val rotatedBitmap = rotateBitmap(bitmap, rotationDegrees)
+        Log.d("ImageProcessing", "Rotated Bitmap successfully.")
         return bitmap
     }
 
+    private fun mediaImageToBitmap(image: Image): Bitmap? {
+        try {
+            val yBuffer = image.planes[0].buffer // Y
+            val uBuffer = image.planes[1].buffer // U
+            val vBuffer = image.planes[2].buffer // V
 
-    /**
-     * rotateImage():
-     *     Decodes and crops the captured image from camera.
-     */
-    private fun rotateImage(source: Bitmap, angle: Float): Bitmap {
+            val ySize = yBuffer.remaining()
+            val uSize = uBuffer.remaining()
+            val vSize = vBuffer.remaining()
+
+            val nv21 = ByteArray(ySize + uSize + vSize)
+            // Copy Y plane
+            yBuffer.get(nv21, 0, ySize)
+            // Copy U and V planes
+            vBuffer.get(nv21, ySize, vSize)
+            uBuffer.get(nv21, ySize + vSize, uSize)
+            val yuvImage = android.graphics.YuvImage(nv21, android.graphics.ImageFormat.NV21, image.width, image.height, null)
+            val outputStream = java.io.ByteArrayOutputStream()
+            yuvImage.compressToJpeg(android.graphics.Rect(0, 0, image.width, image.height), 100, outputStream)
+            val jpegBytes = outputStream.toByteArray()
+            return BitmapFactory.decodeByteArray(jpegBytes, 0, jpegBytes.size)
+        } catch (e: Exception) {
+            Log.e("ImageProcessing", "Exception while converting YUV_420_888 to Bitmap: ${e.message}")
+            return null
+        }
+    }
+
+    // Rotate Bitmap using Matrix
+    private fun rotateBitmap(bitmap: Bitmap, rotationDegrees: Int): Bitmap {
         val matrix = Matrix()
-        matrix.postRotate(angle)
-        return Bitmap.createBitmap(
-            source, 0, 0, source.width, source.height,
-            matrix, true
-        )
+        matrix.postRotate(rotationDegrees.toFloat())
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+    // Convert Bitmap to Image (JPEG format)
+    private fun bitmapToImage(bitmap: Bitmap): Image? {
+        try {
+            val width = bitmap.width
+            val height = bitmap.height
+            val imageReader = ImageReader.newInstance(width, height, android.graphics.ImageFormat.JPEG, 1)
+            val outputImage = imageReader.acquireLatestImage()
+            imageReader.close()
+            return outputImage
+        } catch (e: Exception) {
+            Log.e("ImageProcessing", "Exception while converting Bitmap to Image: ${e.message}")
+            return null
+        }
     }
         
 }
