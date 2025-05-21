@@ -19,7 +19,8 @@
     "react-native-mlkit-odt.podspec",
     "!lib/typescript/example",
     "!android/build",
-    "!ios/build"
+    "!ios/build",
+    "!example"
   ],
   "scripts": {
     "test": "jest",
