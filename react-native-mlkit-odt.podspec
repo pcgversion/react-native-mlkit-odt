@@ -15,7 +15,10 @@ Pod::Spec.new do |s|
   s.source       = { :branch => "https://github.com/pcgversion/react-native-mlkit-odt/tree/react-native-mlkit-odt-v3"}
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
- 
+   # Explicitly define public headers.
+  # This helps CocoaPods understand the module structure and ensures
+  # that 'vision_camera_ocr.h' is findable within the module.
+  s.public_header_files = "ios/react_native_mlkit_odt.h"
   s.dependency "React-Core"
   s.dependency "VisionCamera"
   s.dependency 'GoogleMLKit/ObjectDetection'

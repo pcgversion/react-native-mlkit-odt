@@ -26,6 +26,7 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libMlkitOdt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMlkitOdt.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		713354162DDDC1B4009E9249 /* react_native_mlkit_odt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = react_native_mlkit_odt.h; sourceTree = "<group>"; };
 		714910B02C1CB87800E39898 /* MlkitOdt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MlkitOdt.swift; sourceTree = "<group>"; };
 		71DB79CA2C1C230A00CDAC45 /* MlkitOdt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MlkitOdt.h; sourceTree = "<group>"; };
 		71E2D6302C245AB3006190BA /* TFObjectDetectorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFObjectDetectorHelper.swift; sourceTree = "<group>"; };
@@ -54,6 +55,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				713354162DDDC1B4009E9249 /* react_native_mlkit_odt.h */,
 				71E2D6302C245AB3006190BA /* TFObjectDetectorHelper.swift */,
 				714910B02C1CB87800E39898 /* MlkitOdt.swift */,
 				71DB79CA2C1C230A00CDAC45 /* MlkitOdt.h */,
