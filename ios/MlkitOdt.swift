@@ -5,7 +5,7 @@
 //  Created by Ritesh Jariwala on 14/06/24.
 //  Copyright © 2024. All rights reserved.
 //
-
+import VisionCamera
 import Foundation
 import FirebaseMLModelDownloader
 import MLKitObjectDetectionCustom
@@ -25,7 +25,13 @@ import Vision
 import AVFoundation
 
 @objc(MlkitOdtFrameProcessorPlugin)
-public class MlkitOdtFrameProcessorPlugin: NSObject, FrameProcessorPluginBase {
+public class MlkitOdtFrameProcessorPlugin: FrameProcessorPluginBase {
+    
+    public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
+        super.init(proxy: proxy, options: options)
+
+        print("MlkitOdtFrameProcessorPlugin initialized with options: \(String(describing: options))")
+    }
     
     @objc
     public static func callback(_ frame: Frame!, withArgs args: [Any]!) -> Any! {
@@ -36,7 +42,7 @@ public class MlkitOdtFrameProcessorPlugin: NSObject, FrameProcessorPluginBase {
         // }
         // print("testing comes here...buffer data...2...",frame.buffer)
         // let visionImage = VisionImage(buffer: frame.buffer)
-        var modelName: String = ""; 
+        var modelName: String = "";
         var customModel: String = "";
         var singleImage: Int? = 0;
         var classification: Bool = false;
@@ -95,7 +101,7 @@ public class MlkitOdtFrameProcessorPlugin: NSObject, FrameProcessorPluginBase {
 //             // Define file path where you want to save the image
 //             let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 //             let fileURL = documentsDirectory.appendingPathComponent("image-ob-detection.png")
-//            
+//
 //             do {
 //                 // Write PNG data to file
 //                 try pngData.write(to: fileURL)
@@ -270,6 +276,7 @@ func getDocumentsDirectory() -> URL? {
         // Otherwise, check if the current device orientation is landscape
         return orientation == .landscapeLeft || orientation == .landscapeRight
     }
+
 @objc(MlkitOdt)
 class MlkitOdt: NSObject {
     @objc

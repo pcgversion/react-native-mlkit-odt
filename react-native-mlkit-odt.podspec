@@ -15,9 +15,10 @@ Pod::Spec.new do |s|
   s.source       = { :branch => "https://github.com/pcgversion/react-native-mlkit-odt/tree/react-native-mlkit-odt-v3"}
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
-
+ 
   s.dependency "React-Core"
+  s.dependency "VisionCamera"
   s.dependency 'GoogleMLKit/ObjectDetection'
-  s.dependency 'FirebaseMLModelDownloader', '9.3.0-beta'
+  s.dependency 'FirebaseMLModelDownloader', '10.12.0-beta'
   s.dependency "TensorFlowLiteSwift"
 end

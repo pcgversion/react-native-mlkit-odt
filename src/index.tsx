@@ -1,5 +1,6 @@
 import { NativeModules } from 'react-native';
 import type { Frame } from 'react-native-vision-camera';
+import { VisionCameraProxy } from 'react-native-vision-camera';
 const { MlkitOdt } = NativeModules;
 
 export type DetectedObjectBounding = {
@@ -76,6 +77,8 @@ type MlkitOdtType = typeof wrapper;
  * @param types Array of barcode types to detect (for optimal performance, use less types)
  * @returns Detected barcodes from MLKit
  */
+const plugin = VisionCameraProxy.initFrameProcessorPlugin('detectObjects', {});
+
 export function detectObjects(
   frame: Frame,
   options: ObjectDetectorOptions = defaultOptions
@@ -83,6 +86,11 @@ export function detectObjects(
   'worklet';
   // @ts-ignore
   // eslint-disable-next-line no-undef
-  return __detectObjects(frame, options);
+   if (plugin == null)
+    throw new Error('Failed to load Frame Processor Plugin "detectObjects"!');
+  
+  return plugin.call(frame, options) as unknown as ObjectDetectionResult[];
 }
+
+
 export default wrapper as MlkitOdtType;

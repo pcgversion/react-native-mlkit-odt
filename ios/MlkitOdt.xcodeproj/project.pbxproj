@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		714910B12C1CB87800E39898 /* MlkitOdt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714910B02C1CB87800E39898 /* MlkitOdt.swift */; };
-		717574F72C20401E0035C888 /* MlkitOdt.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */; };
+		717574F72C20401E0035C888 /* MlkitOdt.mm in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* MlkitOdt.mm */; };
 		71C39EB92C2569C000CF835D /* TFObjectDetectorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71E2D6302C245AB3006190BA /* TFObjectDetectorHelper.swift */; };
 /* End PBXBuildFile section */
 
@@ -29,7 +29,7 @@
 		714910B02C1CB87800E39898 /* MlkitOdt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MlkitOdt.swift; sourceTree = "<group>"; };
 		71DB79CA2C1C230A00CDAC45 /* MlkitOdt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MlkitOdt.h; sourceTree = "<group>"; };
 		71E2D6302C245AB3006190BA /* TFObjectDetectorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFObjectDetectorHelper.swift; sourceTree = "<group>"; };
-		B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MlkitOdt.m; sourceTree = "<group>"; };
+		B3E7B5891CC2AC0600A0062D /* MlkitOdt.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MlkitOdt.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +57,7 @@
 				71E2D6302C245AB3006190BA /* TFObjectDetectorHelper.swift */,
 				714910B02C1CB87800E39898 /* MlkitOdt.swift */,
 				71DB79CA2C1C230A00CDAC45 /* MlkitOdt.h */,
-				B3E7B5891CC2AC0600A0062D /* MlkitOdt.m */,
+				B3E7B5891CC2AC0600A0062D /* MlkitOdt.mm */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -121,7 +121,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				71C39EB92C2569C000CF835D /* TFObjectDetectorHelper.swift in Sources */,
-				717574F72C20401E0035C888 /* MlkitOdt.m in Sources */,
+				717574F72C20401E0035C888 /* MlkitOdt.mm in Sources */,
 				714910B12C1CB87800E39898 /* MlkitOdt.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

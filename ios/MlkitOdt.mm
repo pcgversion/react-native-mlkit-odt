@@ -1,18 +1,42 @@
 //#import "MlkitOdt.h"
+#import <Foundation/Foundation.h>
+
 #import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
-
 #import <CoreGraphics/CoreGraphics.h>
 #import <GoogleMLKit/MLKit.h>
-
 //@implementation MlkitOdt
 
 //RCT_EXPORT_MODULE()
-#import <Foundation/Foundation.h>
 #import <VisionCamera/FrameProcessorPlugin.h>
+#import <VisionCamera/FrameProcessorPluginRegistry.h>
+#import <VisionCamera/Frame.h>
+#import "react_native_mlkit_odt-Swift.h"
 
-@interface VISION_EXPORT_SWIFT_FRAME_PROCESSOR(detectObjects, MlkitOdtFrameProcessorPlugin)
+//@interface MlkitOdtFrameProcessorPlugin : FrameProcessorPlugin
+//@end
+//
+//VISION_EXPORT_SWIFT_FRAME_PROCESSOR(MlkitOdtFrameProcessorPlugin, detectObjects)
+//
+//#endif
+
+@interface MlkitOdtFrameProcessorPlugin (FrameProcessorPluginLoader)
 @end
+
+@implementation MlkitOdtFrameProcessorPlugin (FrameProcessorPluginLoader)
+
++ (void)load
+{
+    [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"scanOCR"
+                                        withInitializer:^FrameProcessorPlugin* (VisionCameraProxyHolder* proxy, NSDictionary* options) {
+        return [[MlkitOdtFrameProcessorPlugin alloc] initWithProxy:proxy withOptions:options];
+    }];
+}
+
+@end
+//VISION_EXPORT_SWIFT_FRAME_PROCESSOR(MlkitOdtFrameProcessorPlugin, detectObjects)
+
+
 
 @interface RCT_EXTERN_MODULE(MlkitOdt, NSObject)
 
@@ -132,4 +156,3 @@ RCT_EXTERN_METHOD(detectFromUri:(NSString *)imagePath
                   rejecter:(RCTPromiseRejectBlock)reject);
 
 @end
-
