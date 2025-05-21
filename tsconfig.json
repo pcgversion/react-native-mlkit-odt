@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
-    
+    "baseUrl": "./",
+    "paths": {
+      "react-native-mlkit-odt": ["./src/index"]
+    },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
