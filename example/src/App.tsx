@@ -7,7 +7,7 @@ import {
   ImagePickerResponse,
   launchImageLibrary,
 } from 'react-native-image-picker';
-import MlkitOdt, { ObjectDetectorMode } from 'react-native-mlkit-odt';
+import MlkitOdt  from 'react-native-mlkit-odt';
 
 export default function App() {
   const [result, setResult] = React.useState<any | undefined>();
