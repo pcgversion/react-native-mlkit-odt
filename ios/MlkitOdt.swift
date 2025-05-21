@@ -25,7 +25,7 @@ import Vision
 import AVFoundation
 
 @objc(MlkitOdtFrameProcessorPlugin)
-public class MlkitOdtFrameProcessorPlugin: FrameProcessorPluginBase {
+public class MlkitOdtFrameProcessorPlugin: FrameProcessorPlugin {
     
     public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
         super.init(proxy: proxy, options: options)
