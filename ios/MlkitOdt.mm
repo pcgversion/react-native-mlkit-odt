@@ -27,7 +27,7 @@
 
 + (void)load
 {
-    [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"scanOCR"
+    [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"detectObjects"
                                         withInitializer:^FrameProcessorPlugin* (VisionCameraProxyHolder* proxy, NSDictionary* options) {
         return [[MlkitOdtFrameProcessorPlugin alloc] initWithProxy:proxy withOptions:options];
     }];

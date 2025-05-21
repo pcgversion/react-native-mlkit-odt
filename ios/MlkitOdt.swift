@@ -33,8 +33,8 @@ public class MlkitOdtFrameProcessorPlugin: FrameProcessorPlugin {
         print("MlkitOdtFrameProcessorPlugin initialized with options: \(String(describing: options))")
     }
     
-    @objc
-    public static func callback(_ frame: Frame!, withArgs args: [Any]!) -> Any! {
+    public override func callback(_ frame: Frame, withArguments args: [AnyHashable : Any]?) -> Any {
+
         
         // guard (CMSampleBufferGetImageBuffer(frame.buffer) != nil) else {
         //   print("Failed to get image buffer from sample buffer.")
@@ -47,7 +47,7 @@ public class MlkitOdtFrameProcessorPlugin: FrameProcessorPlugin {
         var singleImage: Int? = 0;
         var classification: Bool = false;
         var multiDetect: Bool = false;
-        if let options = args[0] as? [String: Any] {
+        if let options = args as? [String: Any] {
             print("options....\(options["customModel"])")
             modelName = options["modelName"] as? String ?? ""
             customModel = options["customModel"] as? String ?? ""
@@ -65,7 +65,7 @@ public class MlkitOdtFrameProcessorPlugin: FrameProcessorPlugin {
         }
         guard let imageBuffer = CMSampleBufferGetImageBuffer(frame.buffer) else {
           print("Failed to get image buffer from sample buffer.")
-          return nil
+            return [:]
         }
 
         var ciImage = CIImage(cvPixelBuffer: imageBuffer)
@@ -92,7 +92,7 @@ public class MlkitOdtFrameProcessorPlugin: FrameProcessorPlugin {
         }
         guard let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent) else {
             print("Failed to create bitmap from image.")
-            return nil
+            return [:]
         }
         
         let image = UIImage(cgImage: cgImage)
@@ -114,7 +114,7 @@ public class MlkitOdtFrameProcessorPlugin: FrameProcessorPlugin {
 //         }
         //let visionImage = VisionImage(image: image)
         print("FrameData detect objects: \(image.size.width)x\(image.size.height)")
-        print("args: \(args[0]) \(modelName) \(customModel) \(absoluteModelPath)")
+        print("args: \(args) \(modelName) \(customModel) \(absoluteModelPath)")
 
          if customModel == "tensorflow" {
             let tfObjectDetectorHelper = TFObjectDetectorHelper(modelPath: absoluteModelPath, modelName: modelName, scoreThreshold: 0.5, maxResults: 3)
@@ -148,7 +148,7 @@ public class MlkitOdtFrameProcessorPlugin: FrameProcessorPlugin {
                  
             } catch let error {
                 print("Failed to detect objects in image with error: \(error.localizedDescription).")
-                return nil
+                return [:]
             }
             // detector.process(visionImage) { result, error in
             //     do {
