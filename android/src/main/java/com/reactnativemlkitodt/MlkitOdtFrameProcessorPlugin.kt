@@ -29,7 +29,9 @@ import com.google.android.gms.tasks.Tasks
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 
-import com.mrousavy.camera.frameprocessor.FrameProcessorPlugin
+import com.mrousavy.camera.frameprocessors.Frame
+import com.mrousavy.camera.frameprocessors.FrameProcessorPlugin
+import com.mrousavy.camera.frameprocessors.VisionCameraProxy
 import com.facebook.react.bridge.ReactApplicationContext
 import java.lang.ref.WeakReference
 import com.facebook.react.bridge.ReadableNativeArray
@@ -40,26 +42,27 @@ import android.annotation.SuppressLint
 import java.io.ByteArrayOutputStream
 
 
-class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): FrameProcessorPlugin("detectObjects") {
+class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
    
     private val _context:ReactApplicationContext = reactContext
     private var tfObjectDetector: TFObjectDetectorHelper? = null
-    override fun callback(frame: ImageProxy, params: Array<Any>): Any? {
-        
+    override fun callback(frame: Frame, params: Map<String, Any>?): Any? {
+        val imageProxy = frame.imageProxy
         @SuppressLint("UnsafeOptInUsageError")
-        val mediaImage: Image? = frame.getImage()
-        Log.d("OB Detector....","${frame.imageInfo.rotationDegrees}");
+        val mediaImage: Image? = imageProxy.image
+        Log.d("OB Detector....","${imageProxy.imageInfo.rotationDegrees}");
+        Log.d("PARAMS...","${params}");
         try {
 
             if (params != null && mediaImage != null) {
-                var objectDetectionOptions: ReadableNativeMap =  params[0] as ReadableNativeMap
+                var objectDetectionOptions: ReadableNativeMap =  params as? ReadableNativeMap ?: return null
                 var isSingleImageMode = objectDetectionOptions.getInt("detectorMode")
                 var enableClassification = objectDetectionOptions.getBoolean("shouldEnableClassification") 
                 var enableMultiDetect = objectDetectionOptions.getBoolean("shouldEnableMultipleObjects")
                 var customModel = objectDetectionOptions.getString("customModel")
                 var modelName = objectDetectionOptions.getString("modelName")
                 if(customModel == "automl"){
-                    val image = InputImage.fromMediaImage(mediaImage, frame.imageInfo.rotationDegrees)
+                    val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                     //val image = InputImage.fromMediaImage(mediaImage, 0)
                     var localModel = LocalModel.Builder()
                         .setAssetFilePath("custom_models/object_labeler.tflite")
@@ -93,12 +96,12 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext): Frame
                     if(tfObjectDetector == null)
                         tfObjectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, modelName, _context)
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(0).build()
-                    //val bitmap = imageProxyToBitmap(frame) ?: return null
-                    val bitmap = convertImageProxyToBitmap(frame)
+                    //val bitmap = imageProxyToBitmap(imageProxy) ?: return null
+                    val bitmap = convertImageProxyToBitmap(imageProxy)
                     // Ensure newImage is not null before using it
                     if (bitmap != null) {
-                    //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(frame.imageInfo.rotationDegrees).build()
-                    //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(frame.imageInfo.rotationDegrees).build()
+                    //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(imageProxy.imageInfo.rotationDegrees).build()
+                    //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(imageProxy.imageInfo.rotationDegrees).build()
                         var mlImage = BitmapMlImageBuilder(bitmap).setRotation(0).build()
                         var results = tfObjectDetector?.detectFrameProcessor(mlImage)
                     return tfMakeResultObject(results)
