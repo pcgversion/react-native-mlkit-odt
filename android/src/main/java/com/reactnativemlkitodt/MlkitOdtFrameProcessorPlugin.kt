@@ -1,5 +1,6 @@
 package com.reactnativemlkitodt
 
+import android.content.Context
 import android.graphics.*
 import android.graphics.Rect
 import android.graphics.RectF
@@ -41,13 +42,24 @@ import com.facebook.react.bridge.WritableNativeMap
 import android.annotation.SuppressLint
 import java.io.ByteArrayOutputStream
 
+import java.io.IOException
+import kotlin.text.format
+import android.os.Environment
+
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
    
     private val _context:ReactApplicationContext = reactContext
     private var tfObjectDetector: TFObjectDetectorHelper? = null
+    
     override fun callback(frame: Frame, params: Map<String, Any>?): Any? {
         val imageProxy = frame.imageProxy
+        val bitmap = convertImageProxyToBitmap(frame.imageProxy)
         @SuppressLint("UnsafeOptInUsageError")
         val mediaImage: Image? = imageProxy.image
         Log.d("OB Detector....","${imageProxy.imageInfo.rotationDegrees}");
@@ -55,12 +67,37 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
         try {
 
             if (params != null && mediaImage != null) {
-                var objectDetectionOptions: ReadableNativeMap =  params as? ReadableNativeMap ?: return null
-                var isSingleImageMode = objectDetectionOptions.getInt("detectorMode")
-                var enableClassification = objectDetectionOptions.getBoolean("shouldEnableClassification") 
-                var enableMultiDetect = objectDetectionOptions.getBoolean("shouldEnableMultipleObjects")
-                var customModel = objectDetectionOptions.getString("customModel")
-                var modelName = objectDetectionOptions.getString("modelName")
+                
+                        val detectorModeRaw = params["detectorMode"]
+                val isSingleImageMode = when (detectorModeRaw) {
+                    is Number -> detectorModeRaw.toInt()
+                    else -> {
+                        Log.w("MlkitOdtPlugin", "detectorMode is missing or not a Number (e.g., Double or Int). Received: '$detectorModeRaw'. Defaulting to 0.")
+                        0 // Default to STREAM_MODE or equivalent
+                    }
+                }
+
+                val enableClassificationRaw = params["shouldEnableClassification"]
+                val enableClassification = when (enableClassificationRaw) {
+                    is Boolean -> enableClassificationRaw
+                    else -> {
+                        Log.w("MlkitOdtPlugin", "shouldEnableClassification is missing or not a Boolean. Received: '$enableClassificationRaw'. Defaulting to false.")
+                        false
+                    }
+                }
+
+                val enableMultiDetectRaw = params["shouldEnableMultipleObjects"]
+                val enableMultiDetect = when (enableMultiDetectRaw) {
+                    is Boolean -> enableMultiDetectRaw
+                    else -> {
+                        Log.w("MlkitOdtPlugin", "shouldEnableMultipleObjects is missing or not a Boolean. Received: '$enableMultiDetectRaw'. Defaulting to false.")
+                        false
+                    }
+                }
+
+                val customModel = params["customModel"] as? String // Expects a String, null if not present or wrong type
+                val modelName = params["modelName"] as? String     // Expects a String, null if not present or wrong type
+
                 if(customModel == "automl"){
                     val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                     //val image = InputImage.fromMediaImage(mediaImage, 0)
@@ -97,13 +134,14 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
                         tfObjectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, modelName, _context)
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(0).build()
                     //val bitmap = imageProxyToBitmap(imageProxy) ?: return null
-                    val bitmap = convertImageProxyToBitmap(imageProxy)
+                    
                     // Ensure newImage is not null before using it
                     if (bitmap != null) {
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(imageProxy.imageInfo.rotationDegrees).build()
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(imageProxy.imageInfo.rotationDegrees).build()
                         var mlImage = BitmapMlImageBuilder(bitmap).setRotation(0).build()
                         var results = tfObjectDetector?.detectFrameProcessor(mlImage)
+                        Log.d("MlkitOdtFrameProcessorPlugin result:", "${results}")
                     return tfMakeResultObject(results)
                     }else{
                          // Handle the error case (e.g., log or return early)
@@ -215,9 +253,11 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
         val yBuffer = image.planes[0].buffer // Y
         val uBuffer = image.planes[1].buffer // U
         val vBuffer = image.planes[2].buffer // V
+
         val ySize = yBuffer.remaining()
         val uSize = uBuffer.remaining()
         val vSize = vBuffer.remaining()
+
         val nv21 = ByteArray(ySize + uSize + vSize)
         yBuffer.get(nv21, 0, ySize)
         vBuffer.get(nv21, ySize, vSize)
@@ -228,20 +268,34 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
         yuvImage.compressToJpeg(Rect(0, 0, imageProxy.width, imageProxy.height), 100, out)
         val byteArray = out.toByteArray()
         val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+
         // Rotate the bitmap based on the rotation degrees
         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-            val matrix = Matrix()
-            matrix.postRotate(rotationDegrees.toFloat())
+        val matrix = Matrix()
+        matrix.postRotate(rotationDegrees.toFloat())
 
-        return Bitmap.createBitmap(
-            originalBitmap, 
-            0, 
-            0, 
-            originalBitmap.width, 
-            originalBitmap.height, 
-            matrix, 
+        val rotatedBitmap = Bitmap.createBitmap(
+            originalBitmap,
+            0,
+            0,
+            originalBitmap.width,
+            originalBitmap.height,
+            matrix,
             true
         )
+        // Recycle the original bitmap if it's different from the rotated one and no longer needed
+        if (originalBitmap != rotatedBitmap) {
+            originalBitmap.recycle()
+        }
+
+
+        // --- Save the rotated bitmap to a temporary file ---
+
+        saveBitmapToFile(_context, rotatedBitmap, "rotated_image.jpg")
+
+        // --- End saving ---
+
+        return rotatedBitmap
     }
     fun rotateBitmap(mediaImage: Image, rotationDegrees: Int): Bitmap? {
         Log.d("ImageProcessing", "Received image for rotation.")
@@ -303,6 +357,38 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
         } catch (e: Exception) {
             Log.e("ImageProcessing", "Exception while converting Bitmap to Image: ${e.message}")
             return null
+        }
+    }
+
+     private fun saveBitmapToFile(context: Context, bitmap: Bitmap, baseFilename: String? = null) {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
+        val actualFilename = baseFilename
+
+        // Choose storage location:
+        // 1. App-specific cache directory (recommended for temporary files)
+        val cacheDir = context.cacheDir
+        val file = File(cacheDir, actualFilename)
+
+        // 2. App-specific files directory (for files you want to keep longer but private to app)
+        // val filesDir = context.getExternalFilesDir(null) // Or context.filesDir for internal
+        // val file = File(filesDir, actualFilename)
+
+        // 3. Public directory (requires more permissions and careful handling of Scoped Storage on Android 10+)
+        //    For temporary images, app-specific storage is usually better.
+        // val publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        // val file = File(publicDir, actualFilename)
+        // if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && !publicDir.exists()) {
+        // publicDir.mkdirs()
+        // }
+
+        try {
+            FileOutputStream(file).use { outStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outStream) // Adjust quality as needed
+                outStream.flush()
+                Log.d("VisionCameraOCR", "Bitmap saved successfully to: ${file.absolutePath}")
+            }
+        } catch (e: IOException) {
+            Log.e("VisionCameraOCR", "Error saving bitmap to file", e)
         }
     }
         
