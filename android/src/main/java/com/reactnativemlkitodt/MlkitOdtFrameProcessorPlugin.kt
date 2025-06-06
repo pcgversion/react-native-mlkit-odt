@@ -63,7 +63,6 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
         @SuppressLint("UnsafeOptInUsageError")
         val mediaImage: Image? = imageProxy.image
         Log.d("OB Detector....","${imageProxy.imageInfo.rotationDegrees}");
-        Log.d("PARAMS...","${params}");
         try {
 
             if (params != null && mediaImage != null) {
@@ -141,7 +140,6 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(imageProxy.imageInfo.rotationDegrees).build()
                         var mlImage = BitmapMlImageBuilder(bitmap).setRotation(0).build()
                         var results = tfObjectDetector?.detectFrameProcessor(mlImage)
-                        Log.d("MlkitOdtFrameProcessorPlugin result:", "${results}")
                     return tfMakeResultObject(results)
                     }else{
                          // Handle the error case (e.g., log or return early)
@@ -187,66 +185,78 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
         return null
     }
 
-    private fun tfMakeResultObject(objects: List<Detection>?): WritableArray {
-        val data: WritableArray = Arguments.createArray()
-        for ((i, detectedObject) in objects!!.withIndex()) {
-        val outputObject = Arguments.createMap()
-        
-        outputObject.putMap("bounding", tfGetBoundingResult(detectedObject!!.boundingBox))
-        Log.i("detected object...","${detectedObject!!.categories[0]}")
-            outputObject.putString("trackingID", detectedObject!!.categories[0].label+""+i)
-            val labels = Arguments.createArray()
-            val lbl = Arguments.createMap()
-            lbl.putString("text", detectedObject!!.categories[0].label)
-            lbl.putString("index","0")
-            lbl.putString("confidence", String.format("%.2f", detectedObject!!.categories[0].score))
-            labels.pushMap(lbl)
-            outputObject.putArray("labels", labels)
-        
-        data.pushMap(outputObject)
+    private fun tfMakeResultObject(objects: List<Detection>?): List<Map<String, Any?>> {
+        if (objects == null) return emptyList()
+
+        val data = mutableListOf<Map<String, Any?>>()
+        for ((i, detectedObject) in objects.withIndex()) {
+            // Ensure there's at least one category to process
+            if (detectedObject.categories.isEmpty()) {
+                Log.w("MlkitOdtPlugin", "Detected object has no categories, skipping.")
+                continue
+            }
+            val category = detectedObject.categories[0]
+
+            val labelsData = mutableListOf<Map<String, String?>>()
+            labelsData.add(mapOf(
+                "text" to category.label,
+                "index" to category.index.toString(), // Use actual index if available, otherwise "0" or similar
+                "confidence" to String.format("%.2f", category.score)
+            ))
+
+            val outputObject = mutableMapOf<String, Any?>(
+                "bounding" to tfGetBoundingResult(detectedObject.boundingBox),
+                "trackingID" to (category.label + i.toString()),
+                "labels" to labelsData
+            )
+            data.add(outputObject)
         }
     return data
   }
 
-  private fun makeResultObject(objects: List<DetectedObject>): WritableArray {
-    val data: WritableArray = Arguments.createArray()
-    var i = 0;
-    for (detectedObject in objects) {
-      val outputObject = Arguments.createMap()
-      outputObject.putMap("bounding", getBoundingResult(detectedObject.boundingBox))
-      if (detectedObject.trackingId != null)
-        outputObject.putString("trackingID", detectedObject.trackingId?.toString()+""+i.toString())
-      val labels = Arguments.createArray()
-      detectedObject.labels.forEach { l ->
-        val lbl = Arguments.createMap()
-        lbl.putString("text", l.text)
-        lbl.putString("index", l.index?.toString())
-        lbl.putString("confidence", l.confidence?.toString())
-        labels.pushMap(lbl)
-      }
-      outputObject.putArray("labels", labels)
-      data.pushMap(outputObject)
-      i++;
-    }
-    return data
-  }
+  private fun makeResultObject(objects: List<DetectedObject>): List<Map<String, Any?>> {
+        val data = mutableListOf<Map<String, Any?>>()
+        var i = 0
+        for (detectedObject in objects) {
+            val labelsData = mutableListOf<Map<String, String?>>()
+            detectedObject.labels.forEach { label ->
+                labelsData.add(mapOf(
+                    "text" to label.text,
+                    "index" to label.index.toString(),
+                    "confidence" to label.confidence.toString()
+                ))
+            }
 
-  private fun getBoundingResult(boundingBox: Rect): WritableMap {
-    val coordinates: WritableMap = Arguments.createMap()
-    coordinates.putInt("top", boundingBox.top)
-    coordinates.putInt("left", boundingBox.left)
-    coordinates.putInt("width", boundingBox.width())
-    coordinates.putInt("height", boundingBox.height())
-    return coordinates;
-  }
-  private fun tfGetBoundingResult(boundingBox: RectF): WritableMap {
-    val coordinates: WritableMap = Arguments.createMap()
-    coordinates.putInt("top", boundingBox.top.toInt())
-    coordinates.putInt("left", boundingBox.left.toInt())
-    coordinates.putInt("width", boundingBox.width().toInt())
-    coordinates.putInt("height", boundingBox.height().toInt())
-    return coordinates;
-  }
+            val outputObject = mutableMapOf<String, Any?>(
+                "bounding" to getBoundingResult(detectedObject.boundingBox),
+                "labels" to labelsData
+            )
+            if (detectedObject.trackingId != null) {
+                outputObject["trackingID"] = detectedObject.trackingId?.toString() + i.toString()
+            }
+            data.add(outputObject)
+            i++
+        }
+        return data
+    }
+
+    private fun getBoundingResult(boundingBox: Rect): Map<String, Int> {
+        return mapOf(
+            "top" to boundingBox.top,
+            "left" to boundingBox.left,
+            "width" to boundingBox.width(),
+            "height" to boundingBox.height()
+        )
+    }
+
+    private fun tfGetBoundingResult(boundingBox: RectF): Map<String, Int> {
+        return mapOf(
+            "top" to boundingBox.top.toInt(),
+            "left" to boundingBox.left.toInt(),
+            "width" to boundingBox.width().toInt(),
+            "height" to boundingBox.height().toInt()
+        )
+    }
 
     private fun convertImageProxyToBitmap(imageProxy: ImageProxy): Bitmap? {
         val image = imageProxy.image ?: return null
@@ -291,7 +301,7 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
 
         // --- Save the rotated bitmap to a temporary file ---
 
-        saveBitmapToFile(_context, rotatedBitmap, "rotated_image.jpg")
+        //saveBitmapToFile(_context, rotatedBitmap, "rotated_image.jpg")
 
         // --- End saving ---
 
