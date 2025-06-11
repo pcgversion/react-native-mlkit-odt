@@ -7,6 +7,7 @@ import android.graphics.RectF
 import android.net.Uri
 import com.facebook.react.bridge.*
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.common.internal.ImageConvertUtils
 import com.google.mlkit.vision.objects.*
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions
@@ -52,6 +53,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import android.view.Display
+import android.view.Surface
+import android.view.WindowManager
 class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
    
     private val _context:ReactApplicationContext = reactContext
@@ -59,7 +63,15 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
     
     override fun callback(frame: Frame, params: Map<String, Any>?): Any? {
         val imageProxy = frame.imageProxy
-        val bitmap = convertImageProxyToBitmap(frame.imageProxy)
+        var newRotation = frame.imageProxy.imageInfo.rotationDegrees
+        val surfaceRotation = getDeviceSurfaceRotation(_context)
+        //val bitmap = convertImageProxyToBitmap(frame.imageProxy)
+         if(surfaceRotation == 0)
+            newRotation = 90
+        if(surfaceRotation == 1)
+            newRotation = 0
+        if(surfaceRotation == 3)
+            newRotation = 180
         @SuppressLint("UnsafeOptInUsageError")
         val mediaImage: Image? = imageProxy.image
         Log.d("OB Detector....","${imageProxy.imageInfo.rotationDegrees}");
@@ -131,6 +143,8 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
                 }else if(customModel == "tensorflow") {
                     if(tfObjectDetector == null)
                         tfObjectDetector = TFObjectDetectorHelper(0.5f, 2, 3, 0, 2, modelName, _context)
+                    val image = InputImage.fromMediaImage(mediaImage, newRotation)
+                    val bitmap = ImageConvertUtils.getInstance().getUpRightBitmap(image)
                     //var mlImage = MediaMlImageBuilder(mediaImage).setRotation(0).build()
                     //val bitmap = imageProxyToBitmap(imageProxy) ?: return null
                     
@@ -400,6 +414,32 @@ class MlkitOdtFrameProcessorPlugin(reactContext: ReactApplicationContext, proxy:
         } catch (e: IOException) {
             Log.e("VisionCameraOCR", "Error saving bitmap to file", e)
         }
+    }
+     /**
+     * Gets the current rotation of the device's default display surface.
+     *
+     * @param context The Android application or activity context.
+     * @return An integer representing the rotation. This will be one of:
+     *         <ul>
+     *           <li>{@link android.view.Surface#ROTATION_0} (no rotation, natural orientation)</li>
+     *           <li>{@link android.view.Surface#ROTATION_90} (rotated 90 degrees clockwise)</li>
+     *           <li>{@link android.view.Surface#ROTATION_180} (rotated 180 degrees)</li>
+     *           <li>{@link android.view.Surface#ROTATION_270} (rotated 270 degrees clockwise)</li>
+     *         </ul>
+     *         Returns -1 if the context is null or the WindowManager service cannot be accessed.
+     */
+    fun getDeviceSurfaceRotation(context: Context?): Int {
+        if (context == null) {
+            System.err.println("Error: Context cannot be null to get device surface rotation.")
+            return -1 // Or throw an IllegalArgumentException
+        }
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE)  as? WindowManager
+        return windowManager?.defaultDisplay?.rotation ?: run {
+                System.err.println("Error: Could not retrieve WindowManager or Display service.")
+                // For Android-specific logging, consider:
+                // Log.e("Frame", "Error: Could not retrieve WindowManager or Display service.")
+                -1
+            }
     }
         
 }
